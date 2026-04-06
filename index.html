@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EvoWorld - PRO EDITION 3.2</title>
+    <title>EvoWorld - PRO EDITION 3.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap');
@@ -133,18 +133,18 @@
             <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-red-500 rounded-full blur-[100px] opacity-30"></div>
 
             <h1 class="text-6xl font-black text-white mb-2 italic tracking-tighter relative z-10">
-                EVO<span class="text-red-500">PRO</span> <span class="text-2xl">3.2</span>
+                EVO<span class="text-red-500">PRO</span> <span class="text-2xl">3.3</span>
             </h1>
             <p id="death-reason" class="text-red-400 font-black mb-6 uppercase tracking-widest hidden bg-red-500/20 py-2 rounded-lg border border-red-500/30 relative z-10">Вы погибли!</p>
             
             <button id="btn-play" class="btn-play w-full text-white font-black text-3xl py-5 rounded-2xl uppercase tracking-widest mt-4 relative z-10">ИГРАТЬ</button>
             
             <div class="mt-8 text-left bg-slate-800 p-6 rounded-2xl border border-slate-600 text-slate-300 relative z-10 shadow-inner">
-                <h3 class="font-black text-white mb-3 text-lg border-b border-slate-600 pb-2">ПАТЧ 3.2 (ФИКСЫ):</h3>
+                <h3 class="font-black text-white mb-3 text-lg border-b border-slate-600 pb-2">ПАТЧ 3.3 (БАГИ КАК ФИЧИ):</h3>
                 <ul class="text-sm space-y-3 font-bold">
-                    <li class="flex items-center gap-2">🌊 <span class="text-blue-300">Нормальный океан на дне, рыбы больше не летают!</span></li>
-                    <li class="flex items-center gap-2">💩 <span class="text-yellow-300">Очистка мусора (какашки исчезают, лагов нет).</span></li>
-                    <li class="flex items-center gap-2">💦 <span class="text-cyan-300">Морские течения и физика брызг при нырянии.</span></li>
+                    <li class="flex items-center gap-2">🦅 <span class="text-red-300">Орлы-камикадзе теперь ныряют за добычей в воду.</span></li>
+                    <li class="flex items-center gap-2">👻 <span class="text-cyan-300">Noclip-режим: можно пролетать сквозь землю из-под воды.</span></li>
+                    <li class="flex items-center gap-2">🐧 <span class="text-yellow-300">Пингвины в панике прыгают с льдин при виде акул.</span></li>
                 </ul>
             </div>
         </div>
@@ -154,31 +154,27 @@
 
     <script>
         /** 
-         * EVO WORLD - PRO EDITION (PATCH 3.2)
-         * Архитектура переписана. Летающие акулы уничтожены.
+         * EVO WORLD - PRO EDITION (PATCH 3.3)
+         * Сознательно добавлены новые баги для увеличения хаоса.
          */
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // --- КОНСТАНТЫ МИРА ---
         const WORLD_WIDTH = 8000;  
         const WORLD_HEIGHT = 4500; 
         const SPACE_Y = 1500;
         
-        // Новая система уровней (Горизонтальная)
-        const LAND_Y = 3200;       // Уровень материков (Земля)
-        const WATER_LEVEL = 3500;  // Начало океана
-        const SEA_FLOOR = 4300;    // Дно океана
+        const LAND_Y = 3200;
+        const WATER_LEVEL = 3500;
+        const SEA_FLOOR = 4300;
 
-        // Материки (Острова)
         const PLATFORMS = [
             { id: 'forest', min: 0,    max: 2600, y: LAND_Y, color: '#166534' },
             { id: 'desert', min: 2700, max: 5300, y: LAND_Y, color: '#ca8a04' },
             { id: 'snow',   min: 5400, max: 8000, y: LAND_Y, color: '#e0f2fe' }
         ];
 
-        // --- БАЗА ДАННЫХ ИГРЫ ---
         const EVOLUTION = [
             { id: 0, type: 'fly',      name: "Комар",    emoji: "🦟", size: 20, speed: 6, flap: -8, reqXp: 30, eats: ['poop'], isAquatic: false },
             { id: 1, type: 'butterfly',name: "Бабочка",  emoji: "🦋", size: 30, speed: 7, flap: -9, reqXp: 80, eats: ['flower', 'cactus', 'ice'], isAquatic: false },
@@ -210,7 +206,6 @@
             'pig':    { emoji: '🐖', size: 40, xp: 50, speed: 2, jump: -4, isFlying: false, zones: ['forest'] },
             'camel':  { emoji: '🐪', size: 60, xp: 60, speed: 2, jump: -3, isFlying: false, zones: ['desert'] },
             'penguin':{ emoji: '🐧', size: 35, xp: 40, speed: 3, jump: -5, isFlying: false, zones: ['snow'] },
-            // ВОДНЫЕ МОБЫ (Жестко привязаны к океану)
             'crab':   { emoji: '🦀', size: 20, xp: 20, speed: 2, jump: 0,  isFlying: false, isWaterMob: true, isBottomCrawler: true },
             'fish':   { emoji: '🐟', size: 30, xp: 35, speed: 5, jump: 0,  isFlying: true,  isWaterMob: true }, 
             'shark':  { emoji: '🦈', size: 70, xp: 150, speed: 8, jump: 0,  isFlying: true,  isWaterMob: true, eats: ['turtle', 'fish', 'penguin', 'pig'] },
@@ -236,7 +231,6 @@
         let animals = [];
         let particles = [];
 
-        // --- СИСТЕМА ЧАСТИЦ (VFX) ---
         class Particle {
             constructor(x, y, color, customVy = 0) {
                 this.x = x; this.y = y;
@@ -266,7 +260,6 @@
             }
         }
 
-        // --- ГЕНЕРАЦИЯ МИРА ---
         function getZonePlatform(zones) {
             if(!zones) return PLATFORMS[Math.floor(Math.random() * PLATFORMS.length)];
             const zId = zones[Math.floor(Math.random() * zones.length)];
@@ -295,7 +288,6 @@
                     yPos = p ? p.y - 10 : LAND_Y - 10;
                 }
             }
-
             foods.push({ x: xPos, y: yPos, type: type, createdAt: Date.now(), ...data });
         }
 
@@ -323,21 +315,20 @@
                 type: type, 
                 ...data,
                 direction: Math.random() > 0.5 ? 1 : -1,
-                actionTimer: 0
+                actionTimer: 0,
+                isPanicking: false // Для нового бага
             });
         }
 
         function initWorld() {
             foods = []; animals = []; particles = [];
             timeOfDay = 8000; 
-            
             for(let i=0; i<50; i++) { spawnFood('flower'); spawnFood('cactus'); spawnFood('ice'); spawnFood('kelp'); }
             for(let i=0; i<40; i++) spawnFood('cloud');
             for(let i=0; i<50; i++) { spawnFood('star'); spawnFood('meteor'); spawnFood('planet'); }
             for(let i=0; i<80; i++) spawnAnimal();
         }
 
-        // --- УПРАВЛЕНИЕ ---
         window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
         window.dispatchEvent(new Event('resize'));
         canvas.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
@@ -349,9 +340,7 @@
                 let targetWorldY = mouseY + camera.y;
                 let dy = targetWorldY - player.y;
                 player.vy = dy < 0 ? player.stage.flap * 0.7 : Math.abs(player.stage.flap * 0.5);
-            } else {
-                player.vy = player.stage.flap; 
-            }
+            } else { player.vy = player.stage.flap; }
             createExplosion(player.x, player.y + player.stage.size, player.inWater ? '#38bdf8' : '#ffffff', 3);
         }
         canvas.addEventListener('mousedown', flap);
@@ -375,7 +364,6 @@
             }
         }, 8000);
 
-        // --- ЛОГИКА ---
         function checkEvolution() {
             if (player.xp >= player.stage.reqXp) {
                 const nextStage = EVOLUTION[player.stage.id + 1];
@@ -398,7 +386,6 @@
             const req = player.stage.reqXp;
             document.getElementById('xp-fill').style.width = req === 99999 ? '100%' : `${(player.xp / req) * 100}%`;
             document.getElementById('xp-text').textContent = req === 99999 ? "MAX LEVEL" : `${player.xp} / ${req} XP`;
-
             const eatIcons = player.stage.eats.map(f => FOOD_TYPES[f]?.emoji || ANIMAL_TYPES[f]?.emoji || EVOLUTION.find(e=>e.type===f)?.emoji || '🥩');
             document.getElementById('eats-info').textContent = "ЕСТ: " + eatIcons.join(' ');
         }
@@ -418,18 +405,16 @@
             if (!gameActive) return;
 
             timeOfDay += 2; if(timeOfDay > 24000) timeOfDay = 0;
-            const OCEAN_CURRENT = Math.sin(Date.now() / 2000) * 1.5; // Течение
+            const OCEAN_CURRENT = Math.sin(Date.now() / 2000) * 1.5;
 
-            // Проверка воды и всплеск
             let wasInWater = player.inWater;
             player.inWater = player.y > WATER_LEVEL;
             
             if (!wasInWater && player.inWater) {
-                createExplosion(player.x, WATER_LEVEL, '#e0f2fe', 30, true); // Брызги
-                player.vy *= 0.2; // Удар о воду
+                createExplosion(player.x, WATER_LEVEL, '#e0f2fe', 30, true);
+                player.vy *= 0.2;
             }
 
-            // Движение игрока
             let targetWorldX = mouseX + camera.x;
             let dx = targetWorldX - player.x;
             if (Math.abs(dx) > 10) {
@@ -439,23 +424,18 @@
             } else { player.vx *= 0.9; }
 
             if (player.inWater) {
-                player.vy += 0.1; 
-                player.vy *= 0.9; 
-                player.x += OCEAN_CURRENT; // Сносит течением
+                player.vy += 0.1; player.vy *= 0.9; player.x += OCEAN_CURRENT;
             } else {
-                player.vy += 0.4; 
-                player.vy *= 0.96; 
+                player.vy += 0.4; player.vy *= 0.96; 
             }
             
-            player.x += player.vx; 
-            player.y += player.vy;
+            player.x += player.vx; player.y += player.vy;
 
-            // Коллизии игрока с картой
             if (player.x < 0) { player.x = 0; player.vx = 0; }
             if (player.x > WORLD_WIDTH) { player.x = WORLD_WIDTH; player.vx = 0; }
             if (player.y < 0) { player.y = 0; player.vy = 0; } 
             
-            // Коллизия с материками (если падаем сверху)
+            // Коллизия с островами сверху
             if (!player.inWater && player.vy > 0) {
                 for (let p of PLATFORMS) {
                     if (player.x >= p.min && player.x <= p.max && player.y >= p.y && player.y - player.vy <= p.y + 20) {
@@ -463,18 +443,18 @@
                     }
                 }
             }
-            if (player.y > SEA_FLOOR) { player.y = SEA_FLOOR; player.vy = 0; } // Дно
+            // БАГ NOCLIP: Коллизия с островами СНИЗУ намеренно ОТСУТСТВУЕТ, позволяя пролетать сквозь землю.
+            if (player.y > SEA_FLOOR) { player.y = SEA_FLOOR; player.vy = 0; }
 
-            // Кислород
             let isSuffocating = false;
             let deathMsg = "";
             if (player.y < SPACE_Y && player.stage.id < 7) { isSuffocating = true; deathMsg = "Задохнулся в вакууме! 🥶"; } 
             else if (player.inWater && !player.stage.isAquatic) { isSuffocating = true; deathMsg = "Утонул в океане! 🫧"; }
             else if (!player.inWater && player.stage.isAquatic && player.stage.type !== 'turtle') { isSuffocating = true; deathMsg = "Высох на суше! ☀️"; }
-
+            
             if (isSuffocating) {
                 let depthPenalty = player.inWater ? ((player.y - WATER_LEVEL) / 500) : 0;
-                player.oxygen -= (0.3 + depthPenalty); // На глубине кислород тратится быстрее!
+                player.oxygen -= (0.3 + depthPenalty); 
                 if (player.oxygen <= 0) die(deathMsg);
             } else { player.oxygen = Math.min(100, player.oxygen + 1); }
 
@@ -486,10 +466,11 @@
             camera.x = Math.max(0, Math.min(camera.x, WORLD_WIDTH - canvas.width));
             camera.y = Math.max(0, Math.min(camera.y, WORLD_HEIGHT - canvas.height));
 
-            // ИИ ЖИВОТНЫХ
             for (let i = animals.length - 1; i >= 0; i--) {
                 let anim = animals[i];
+                let animInWater = anim.y > WATER_LEVEL;
                 
+                // Физика мобов
                 if (anim.isWaterMob) {
                     anim.x += anim.vx + OCEAN_CURRENT;
                     anim.y += anim.vy;
@@ -499,14 +480,17 @@
                         if (anim.y < WATER_LEVEL + 50) { anim.y = WATER_LEVEL + 50; anim.vy *= -1; }
                         if (anim.y > SEA_FLOOR - 50) { anim.y = SEA_FLOOR - 50; anim.vy *= -1; }
                     }
-                } else {
-                    if (!anim.isFlying) anim.vy += 0.4; 
+                } else { // Сухопутные и летающие
+                    // НОВЫЙ БАГ: Орлы-дайверы
+                    if (anim.type !== 'eagle' && !anim.isFlying) anim.vy += 0.4;
+                    else if (anim.type === 'eagle') anim.vy += 0.2; // У орла гравитация слабее, чтобы он мог вынырнуть
+                    
                     anim.x += anim.vx; anim.y += anim.vy;
                     
                     let p = PLATFORMS.find(pl => anim.x >= pl.min && anim.x <= pl.max);
                     let ground = p ? p.y : SEA_FLOOR;
                     
-                    if (anim.y > ground && !anim.isFlying) {
+                    if (anim.y > ground && !animInWater && !anim.isFlying) {
                         anim.y = ground; anim.vy = 0;
                         if (Math.random() < 0.02) anim.vy = anim.jump; 
                     }
@@ -524,7 +508,8 @@
                     isHunting = true;
                     anim.direction = player.x > anim.x ? 1 : -1;
                     anim.vx = anim.direction * anim.speed * 1.2; 
-                    if (anim.isFlying || anim.isWaterMob) anim.vy = (player.y - anim.y) * 0.05; 
+                    // Орлы теперь ныряют!
+                    if (anim.isFlying || anim.isWaterMob) anim.vy += (player.y - anim.y - 10) * 0.01; 
                     
                     if (distToPlayer < player.stage.size + anim.size * 0.5) {
                         addKillFeed(anim.emoji + " " + anim.name, player.stage.name);
@@ -532,17 +517,30 @@
                     }
                 }
 
-                if (!isHunting && anim.actionTimer <= 0) {
+                if (!isHunting && anim.actionTimer <= 0 && !anim.isPanicking) {
                     anim.actionTimer = 60 + Math.random() * 100;
                     anim.direction = Math.random() > 0.5 ? 1 : -1;
                     anim.vx = anim.direction * anim.speed;
                     if (anim.isFlying || (anim.isWaterMob && !anim.isBottomCrawler)) anim.vy = (Math.random() - 0.5) * anim.speed; 
                 }
+
+                // НОВЫЙ БАГ: Панический ИИ Пингвинов
+                if (anim.type === 'penguin' && !anim.isPanicking) {
+                    for (let shark of animals) {
+                        if (shark.type === 'shark' && Math.hypot(anim.x - shark.x, anim.y - shark.y) < 400) {
+                            anim.isPanicking = true;
+                            anim.actionTimer = 180; // Паникует 3 секунды
+                            anim.vx = (anim.x - shark.x) > 0 ? anim.speed * 3 : -anim.speed * 3;
+                            anim.vy = anim.jump * 2.5; // Панический прыжок
+                            break; 
+                        }
+                    }
+                }
+                if (anim.isPanicking && anim.actionTimer <= 0) anim.isPanicking = false;
                 
                 if (anim.x < 0 || anim.x > WORLD_WIDTH) anim.vx *= -1;
-                if (anim.isFlying && anim.y < 1500) anim.vy *= -1; 
+                if (anim.isFlying && anim.y < 1500 && anim.type !== 'eagle') anim.vy *= -1; 
 
-                // VIP СПАВН ЕДЫ
                 if ((anim.type === 'pig' || anim.type === 'mouse' || anim.type === 'camel') && Math.random() < 0.003) {
                     spawnFood('poop', anim.x, anim.y, true);
                 }
@@ -554,16 +552,12 @@
                 }
             }
 
-            // ЛОГИКА ЕДЫ И СБОРЩИК МУСОРА
             const now = Date.now();
             for (let i = foods.length - 1; i >= 0; i--) {
                 const food = foods[i];
-                
-                // GC: Удаляем старые какашки через 15 сек (чтобы не лагало)
                 if (food.type === 'poop' && now - food.createdAt > 15000) {
                     foods.splice(i, 1); continue;
                 }
-
                 if (food.floatSpeed) food.x -= food.floatSpeed; 
                 if (food.x < -200) food.x = WORLD_WIDTH + 200; 
 
@@ -602,17 +596,14 @@
 
             ctx.save(); ctx.translate(-camera.x, -camera.y);
 
-            // МАТЕРИКИ
             PLATFORMS.forEach(p => {
                 ctx.fillStyle = p.color;
-                ctx.fillRect(p.min, p.y, p.max - p.min, WATER_LEVEL - p.y + 50); // Толщина острова
+                ctx.fillRect(p.min, p.y, p.max - p.min, WATER_LEVEL - p.y + 50);
             });
             
-            // ОКЕАН (Один глобальный слой)
             ctx.fillStyle = 'rgba(3, 105, 161, 0.7)'; 
             ctx.fillRect(0, WATER_LEVEL, WORLD_WIDTH, SEA_FLOOR - WATER_LEVEL);
             
-            // МОРСКОЕ ДНО
             ctx.fillStyle = '#b45309'; 
             ctx.fillRect(0, SEA_FLOOR, WORLD_WIDTH, WORLD_HEIGHT - SEA_FLOOR);
 
