@@ -7,20 +7,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap');
-        
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            background-color: #000; 
-            font-family: 'Nunito', sans-serif; 
-            user-select: none; 
-            touch-action: none; 
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Nunito', sans-serif;
+            user-select: none;
+            touch-action: none;
         }
+
         canvas { display: block; }
 
-        #menu { 
-            background: rgba(15, 23, 42, 0.85); 
-            backdrop-filter: blur(12px); 
+        #menu {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
         }
 
         .btn-play {
@@ -28,40 +29,44 @@
             box-shadow: 0 6px 0 #7f1d1d, 0 15px 20px rgba(0,0,0,0.5);
             transition: all 0.1s;
         }
-        .btn-play:active { 
-            transform: translateY(6px); 
-            box-shadow: 0 0px 0 #7f1d1d; 
+
+        .btn-play:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 #7f1d1d;
         }
 
         .bar-container {
-            width: 280px; 
-            height: 24px; 
+            width: 280px;
+            height: 24px;
             background: rgba(0,0,0,0.7);
-            border: 2px solid #334155; 
+            border: 2px solid #334155;
             border-radius: 12px;
-            overflow: hidden; 
-            position: relative; 
+            overflow: hidden;
+            position: relative;
             margin-top: 6px;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
         }
-        .xp-fill { 
-            height: 100%; 
-            background: linear-gradient(90deg, #facc15, #f59e0b); 
-            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #facc15, #f59e0b);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .o2-fill { 
-            height: 100%; 
-            background: linear-gradient(90deg, #38bdf8, #0284c7); 
-            transition: width 0.1s; 
+
+        .o2-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #0284c7);
+            transition: width 0.1s;
         }
+
         .bar-text {
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
+            position: absolute;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            color: white; 
-            font-size: 13px; 
-            font-weight: 900; 
+            color: white;
+            font-size: 13px;
+            font-weight: 900;
             text-shadow: 1px 1px 2px black;
             letter-spacing: 1px;
         }
@@ -76,6 +81,7 @@
             align-items: flex-end;
             pointer-events: none;
         }
+
         .kill-msg {
             background: rgba(0,0,0,0.5);
             color: white;
@@ -86,6 +92,7 @@
             animation: fadeOut 4s forwards;
             border: 1px solid rgba(255,255,255,0.1);
         }
+
         @keyframes fadeOut {
             0% { opacity: 1; transform: translateX(20px); }
             10% { opacity: 1; transform: translateX(0); }
@@ -96,15 +103,12 @@
 </head>
 <body>
 
-    <!-- ======================= -->
-    <!-- ==== ИНТЕРФЕЙС HUD ==== -->
-    <!-- ======================= -->
     <div id="hud" class="fixed top-0 left-0 w-full p-4 flex justify-between items-start z-10 hidden pointer-events-none">
         <div class="flex items-start gap-4">
             <div id="player-emoji" class="text-6xl drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] bg-slate-800/50 p-3 rounded-2xl border-2 border-slate-500/50 transition-transform duration-300">🦟</div>
             <div>
                 <h2 id="player-name-display" class="text-white text-3xl font-black drop-shadow-lg tracking-wide">Комар</h2>
-                
+
                 <div class="bar-container">
                     <div id="xp-fill" class="xp-fill" style="width: 0%;"></div>
                     <div id="xp-text" class="bar-text">0 / 30 XP</div>
@@ -129,28 +133,26 @@
 
     <div id="killfeed"></div>
 
-    <!-- ===================== -->
-    <!-- ==== ГЛАВНОЕ МЕНЮ ==== -->
-    <!-- ===================== -->
     <div id="menu" class="fixed inset-0 flex items-center justify-center z-50">
         <div class="bg-slate-900 p-10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.8)] text-center max-w-lg w-full border-4 border-slate-700 relative overflow-hidden">
-            
+
             <div class="absolute -top-20 -left-20 w-40 h-40 bg-blue-500 rounded-full blur-[100px] opacity-30"></div>
             <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-red-500 rounded-full blur-[100px] opacity-30"></div>
 
             <h1 class="text-6xl font-black text-white mb-2 italic tracking-tighter relative z-10">
                 EVO<span class="text-red-500">PRO</span> <span class="text-2xl">3.4</span>
             </h1>
+
             <p id="death-reason" class="text-red-400 font-black mb-6 uppercase tracking-widest hidden bg-red-500/20 py-2 rounded-lg border border-red-500/30 relative z-10">Вы погибли!</p>
-            
+
             <button id="btn-play" class="btn-play w-full text-white font-black text-3xl py-5 rounded-2xl uppercase tracking-widest mt-4 relative z-10">ИГРАТЬ</button>
-            
+
             <div class="mt-8 text-left bg-slate-800 p-6 rounded-2xl border border-slate-600 text-slate-300 relative z-10 shadow-inner">
-                <h3 class="font-black text-white mb-3 text-lg border-b border-slate-600 pb-2">ПАТЧ 3.4 (СТАБИЛЬНАЯ ВЕРСИЯ):</h3>
+                <h3 class="font-black text-white mb-3 text-lg border-b border-slate-600 pb-2">PATCH NOTES v3.4:</h3>
                 <ul class="text-sm space-y-3 font-bold">
-                    <li class="flex items-center gap-2">✅ <span class="text-green-300">Noclip-баг исправлен, мобы не застревают в земле.</span></li>
-                    <li class="flex items-center gap-2">✅ <span class="text-green-300">Орлы и пингвины ведут себя адекватно.</span></li>
-                    <li class="flex items-center gap-2">✅ <span class="text-green-300">Сухопутные животные больше не падают с обрывов.</span></li>
+                    <li class="flex items-center gap-2">🌊 <span class="text-blue-300">Вода теперь внизу карты, а не справа как биом.</span></li>
+                    <li class="flex items-center gap-2">🦈 <span class="text-cyan-300">Акулы, рыбы и крабы живут только в море.</span></li>
+                    <li class="flex items-center gap-2">🚀 <span class="text-purple-300">Космос, планеты и эволюция до Божества сохранены.</span></li>
                 </ul>
             </div>
         </div>
@@ -159,108 +161,115 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // =========================================================================
-        // == EVO WORLD - PRO EDITION (PATCH 3.4)                                ==
-        // == КОД ПОЛНОСТЬЮ ПЕРЕРАБОТАН И ЗАДОКУМЕНТИРОВАН ДЛЯ СТАБИЛЬНОСТИ       ==
-        // == Автор правок: Твой ИИ-напарник                                     ==
-        // =========================================================================
-
-        // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И КОНТЕКСТ ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        
-        // --- КОНСТАНТЫ ИГРОВОГО МИРА ---
-        const WORLD_WIDTH = 8000;  
-        const WORLD_HEIGHT = 4500; 
+
+        // =========================
+        // КОНСТАНТЫ МИРА
+        // =========================
+        const WORLD_WIDTH = 8000;
+        const WORLD_HEIGHT = 5000;
+
+        const GROUND_Y = 3200;
+        const WATER_SURFACE_Y = 3800;
+        const SEA_FLOOR_Y = 4700;
         const SPACE_Y = 1500;
-        
-        // --- ГОРИЗОНТАЛЬНАЯ АРХИТЕКТУРА МИРА ---
-        const LAND_Y = 3200;       // Уровень поверхности островов
-        const PLATFORM_THICKNESS = 250; // Толщина островов
-        const WATER_LEVEL = 3500;  // Уровень поверхности океана
-        const SEA_FLOOR = 4300;    // Уровень морского дна
 
-        // --- ОПИСАНИЕ ПЛАТФОРМ-ОСТРОВОВ ---
-        const PLATFORMS = [
-            { id: 'forest', min: 0,    max: 2600, y: LAND_Y, color: '#166534' },
-            { id: 'desert', min: 2700, max: 5300, y: LAND_Y, color: '#ca8a04' },
-            { id: 'snow',   min: 5400, max: 8000, y: LAND_Y, color: '#e0f2fe' }
-        ];
+        const BIOME_FOREST = { min: 0, max: 2666, color: '#166534' };
+        const BIOME_DESERT = { min: 2666, max: 5333, color: '#ca8a04' };
+        const BIOME_SNOW   = { min: 5333, max: 8000, color: '#e0f2fe' };
 
-        // --- БАЗА ДАННЫХ: ЭВОЛЮЦИЯ ИГРОКА ---
+        // =========================
+        // БАЗА ЭВОЛЮЦИИ
+        // =========================
         const EVOLUTION = [
-            { id: 0, type: 'fly',      name: "Комар",    emoji: "🦟", size: 20, speed: 6, flap: -8, reqXp: 30, eats: ['poop'], isAquatic: false },
-            { id: 1, type: 'butterfly',name: "Бабочка",  emoji: "🦋", size: 30, speed: 7, flap: -9, reqXp: 80, eats: ['flower', 'cactus', 'ice'], isAquatic: false },
-            { id: 2, type: 'bird',     name: "Птичка",   emoji: "🐦", size: 40, speed: 9, flap: -10, reqXp: 200, eats: ['bug', 'crab'], isAquatic: false },
-            { id: 3, type: 'turtle',   name: "Черепаха", emoji: "🐢", size: 50, speed: 5, flap: -6, reqXp: 400, eats: ['kelp', 'fish'], isAquatic: true },
-            { id: 4, type: 'eagle',    name: "Сокол",    emoji: "🦅", size: 65, speed: 13, flap: -12, reqXp: 800, eats: ['mouse', 'penguin', 'turtle'], isAquatic: false },
-            { id: 5, type: 'shark',    name: "Акула",    emoji: "🦈", size: 85, speed: 14, flap: -10, reqXp: 1500, eats: ['turtle', 'penguin', 'pig'], isAquatic: true },
-            { id: 6, type: 'dragon',   name: "Дракон",   emoji: "🐉", size: 100, speed: 16, flap: -14, reqXp: 3000, eats: ['camel', 'shark', 'cloud'], isAquatic: false },
-            { id: 7, type: 'alien',    name: "Пришелец", emoji: "👽", size: 110, speed: 19, flap: -16, reqXp: 6000, eats: ['star'], isAquatic: false },
-            { id: 8, type: 'ufo',      name: "НЛО",      emoji: "🛸", size: 140, speed: 23, flap: -18, reqXp: 12000, eats: ['meteor'], isAquatic: false },
-            { id: 9, type: 'god',      name: "Божество", emoji: "🌌", size: 200, speed: 26, flap: -20, reqXp: 99999, eats: ['planet'], isAquatic: false }
+            { id: 0, type: 'fly',       name: "Комар",    emoji: "🦟", size: 20,  speed: 6,  flap: -8,  reqXp: 30,    eats: ['poop'], isAquatic: false },
+            { id: 1, type: 'butterfly', name: "Бабочка",  emoji: "🦋", size: 30,  speed: 7,  flap: -9,  reqXp: 80,    eats: ['flower', 'cactus', 'ice'], isAquatic: false },
+            { id: 2, type: 'bird',      name: "Птичка",   emoji: "🐦", size: 40,  speed: 9,  flap: -10, reqXp: 200,   eats: ['bug', 'crab'], isAquatic: false },
+            { id: 3, type: 'turtle',    name: "Черепаха", emoji: "🐢", size: 50,  speed: 5,  flap: -6,  reqXp: 400,   eats: ['kelp', 'fish'], isAquatic: true },
+            { id: 4, type: 'eagle',     name: "Сокол",    emoji: "🦅", size: 65,  speed: 13, flap: -12, reqXp: 800,   eats: ['mouse', 'penguin', 'turtle'], isAquatic: false },
+            { id: 5, type: 'shark',     name: "Акула",    emoji: "🦈", size: 85,  speed: 14, flap: -10, reqXp: 1500,  eats: ['turtle', 'penguin', 'pig'], isAquatic: true },
+            { id: 6, type: 'dragon',    name: "Дракон",   emoji: "🐉", size: 100, speed: 16, flap: -14, reqXp: 3000,  eats: ['camel', 'shark', 'cloud'], isAquatic: false },
+            { id: 7, type: 'alien',     name: "Пришелец", emoji: "👽", size: 110, speed: 19, flap: -16, reqXp: 6000,  eats: ['star'], isAquatic: false },
+            { id: 8, type: 'ufo',       name: "НЛО",      emoji: "🛸", size: 140, speed: 23, flap: -18, reqXp: 12000, eats: ['meteor'], isAquatic: false },
+            { id: 9, type: 'god',       name: "Божество", emoji: "🌌", size: 200, speed: 26, flap: -20, reqXp: 99999, eats: ['planet'], isAquatic: false }
         ];
 
-        // --- БАЗА ДАННЫХ: ЕДА ---
+        // =========================
+        // ЕДА
+        // =========================
         const FOOD_TYPES = {
-            'poop':   { emoji: '💩', size: 15, xp: 5,   isGround: true },
-            'flower': { emoji: '🌺', size: 20, xp: 10,  zones: ['forest'] },
-            'cactus': { emoji: '🌵', size: 25, xp: 15,  zones: ['desert'] },
-            'ice':    { emoji: '🧊', size: 20, xp: 10,  zones: ['snow'] },
-            'kelp':   { emoji: '🌿', size: 25, xp: 15,  isSeaFloor: true },
-            'cloud':  { emoji: '☁️', size: 70, xp: 100, floatSpeed: 1, isSky: true }, 
-            'star':   { emoji: '⭐', size: 35, xp: 200, floatSpeed: 0.5, isSpace: true }, 
-            'meteor': { emoji: '☄️', size: 55, xp: 500, floatSpeed: 3, isSpace: true },
-            'planet': { emoji: '🪐', size: 110,xp: 1500, floatSpeed: 0.2, isSpace: true }
+            poop:   { emoji: '💩', size: 15,  xp: 5,   zones: ['forest', 'desert', 'snow'] },
+            flower: { emoji: '🌺', size: 20,  xp: 10,  zones: ['forest'] },
+            cactus: { emoji: '🌵', size: 25,  xp: 15,  zones: ['desert'] },
+            ice:    { emoji: '🧊', size: 20,  xp: 10,  zones: ['snow'] },
+            kelp:   { emoji: '🌿', size: 25,  xp: 15,  isOceanFood: true },
+            cloud:  { emoji: '☁️', size: 70,  xp: 100, floatSpeed: 1,   isSky: true },
+            star:   { emoji: '⭐', size: 35,  xp: 200, floatSpeed: 0.5, isSpace: true },
+            meteor: { emoji: '☄️', size: 55,  xp: 500, floatSpeed: 3,   isSpace: true },
+            planet: { emoji: '🪐', size: 110, xp: 1500,floatSpeed: 0.2, isSpace: true }
         };
 
-        // --- БАЗА ДАННЫХ: ЖИВОТНЫЕ (БОТЫ) ---
+        // =========================
+        // ЖИВОТНЫЕ
+        // =========================
         const ANIMAL_TYPES = {
-            'bug':    { emoji: '🪲', size: 15, xp: 15, speed: 3, jump: -6, isFlying: true,  zones: ['forest', 'desert'] },
-            'mouse':  { emoji: '🐁', size: 25, xp: 25, speed: 4, jump: -5, isFlying: false, zones: ['forest'] },
-            'pig':    { emoji: '🐖', size: 40, xp: 50, speed: 2, jump: -4, isFlying: false, zones: ['forest'] },
-            'camel':  { emoji: '🐪', size: 60, xp: 60, speed: 2, jump: -3, isFlying: false, zones: ['desert'] },
-            'penguin':{ emoji: '🐧', size: 35, xp: 40, speed: 3, jump: -5, isFlying: false, zones: ['snow'] },
-            'crab':   { emoji: '🦀', size: 20, xp: 20, speed: 2, jump: 0,  isFlying: false, isWaterMob: true, isBottomCrawler: true },
-            'fish':   { emoji: '🐟', size: 30, xp: 35, speed: 5, jump: 0,  isFlying: true,  isWaterMob: true }, 
-            'shark':  { emoji: '🦈', size: 70, xp: 150, speed: 8, jump: 0,  isFlying: true,  isWaterMob: true, eats: ['turtle', 'fish', 'penguin', 'pig'] },
-            'eagle':  { emoji: '🦅', size: 60, xp: 120, speed: 9, jump: -8, isFlying: true,  zones: ['forest', 'snow', 'desert'], eats: ['mouse', 'penguin', 'turtle'] }
+            bug:     { emoji: '🪲', size: 15, xp: 15,  speed: 3, jump: -6, isFlying: true,  minY: GROUND_Y - 500, zones: ['forest', 'desert'] },
+            mouse:   { emoji: '🐁', size: 25, xp: 25,  speed: 4, jump: -5, isFlying: false, minY: GROUND_Y, zones: ['forest'] },
+            pig:     { emoji: '🐖', size: 40, xp: 50,  speed: 2, jump: -4, isFlying: false, minY: GROUND_Y, zones: ['forest'] },
+            camel:   { emoji: '🐪', size: 50, xp: 60,  speed: 2, jump: -3, isFlying: false, minY: GROUND_Y, zones: ['desert'] },
+            penguin: { emoji: '🐧', size: 35, xp: 40,  speed: 3, jump: -5, isFlying: false, minY: GROUND_Y, zones: ['snow'] },
+
+            crab:    { emoji: '🦀', size: 20, xp: 20,  speed: 2, jump: 0,  isFlying: false, isAquaticMob: true, isBottomWalker: true },
+            fish:    { emoji: '🐟', size: 30, xp: 35,  speed: 5, jump: 0,  isFlying: true,  isAquaticMob: true, minY: WATER_SURFACE_Y + 60, maxY: SEA_FLOOR_Y - 120 },
+            shark:   { emoji: '🦈', size: 70, xp: 150, speed: 8, jump: 0,  isFlying: true,  isAquaticMob: true, minY: WATER_SURFACE_Y + 80, maxY: SEA_FLOOR_Y - 160, eats: ['turtle', 'fish', 'penguin', 'pig'] },
+
+            eagle:   { emoji: '🦅', size: 60, xp: 120, speed: 9, jump: -8, isFlying: true,  minY: GROUND_Y - 800, zones: ['forest', 'snow', 'desert'], eats: ['mouse', 'penguin', 'turtle'] }
         };
 
-        // --- СОСТОЯНИЕ ИГРЫ ---
+        // =========================
+        // СОСТОЯНИЕ ИГРЫ
+        // =========================
         let gameActive = false;
         let mouseX = 0, mouseY = 0;
         let camera = { x: 0, y: 0 };
         let timeOfDay = 0;
-        
+
         let player = {
-            x: 1000, y: LAND_Y - 100,
-            vx: 0, vy: 0, 
+            x: 1000,
+            y: GROUND_Y - 100,
+            vx: 0,
+            vy: 0,
             stage: EVOLUTION[0],
-            xp: 0, score: 0, 
-            direction: 1, 
+            xp: 0,
+            score: 0,
+            direction: 1,
             oxygen: 100,
             inWater: false
         };
 
-        let foods = []; 
+        let foods = [];
         let animals = [];
         let particles = [];
 
-        // --- СИСТЕМА ЧАСТИЦ (ЭФФЕКТЫ) ---
+        // =========================
+        // ЧАСТИЦЫ
+        // =========================
         class Particle {
-            constructor(x, y, color, customVy = 0) {
-                this.x = x; this.y = y;
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
                 this.vx = (Math.random() - 0.5) * 10;
-                this.vy = customVy || (Math.random() - 0.5) * 10;
+                this.vy = (Math.random() - 0.5) * 10;
                 this.size = Math.random() * 6 + 2;
                 this.color = color;
                 this.life = 1.0;
                 this.decay = Math.random() * 0.02 + 0.02;
             }
             update() {
-                this.x += this.vx; this.y += this.vy;
-                this.vy += 0.2; 
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.2;
                 this.life -= this.decay;
             }
             draw(ctx) {
@@ -270,89 +279,166 @@
                 ctx.globalAlpha = 1.0;
             }
         }
-        function createExplosion(x, y, color, count = 15, isSplash = false) {
-            for(let i = 0; i < count; i++) {
-                particles.push(new Particle(x, y, color, isSplash ? -Math.random()*15 : 0));
+
+        function createExplosion(x, y, color, count = 15) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color));
             }
         }
 
-        // --- ГЕНЕРАЦИЯ И СПАВН ОБЪЕКТОВ ---
-        function getZonePlatform(zones) {
-            if(!zones) return PLATFORMS[Math.floor(Math.random() * PLATFORMS.length)];
-            const zId = zones[Math.floor(Math.random() * zones.length)];
-            return PLATFORMS.find(p => p.id === zId) || PLATFORMS[0];
+        // =========================
+        // ГЕНЕРАЦИЯ
+        // =========================
+        function getZoneX(zones) {
+            if (!zones || zones.length === 0) return Math.random() * WORLD_WIDTH;
+
+            const zone = zones[Math.floor(Math.random() * zones.length)];
+
+            if (zone === 'forest') {
+                return BIOME_FOREST.min + Math.random() * (BIOME_FOREST.max - BIOME_FOREST.min);
+            }
+            if (zone === 'desert') {
+                return BIOME_DESERT.min + Math.random() * (BIOME_DESERT.max - BIOME_DESERT.min);
+            }
+            if (zone === 'snow') {
+                return BIOME_SNOW.min + Math.random() * (BIOME_SNOW.max - BIOME_SNOW.min);
+            }
+
+            return Math.random() * WORLD_WIDTH;
         }
 
         function spawnFood(type, forcedX = null, forcedY = null, isVIP = false) {
-            if (!isVIP && foods.length > 200) return;
-            let data = FOOD_TYPES[type];
-            let xPos = forcedX, yPos = forcedY;
-            
-            if (!xPos) {
-                if(data.isSpace || data.isSky || data.isSeaFloor) xPos = Math.random() * WORLD_WIDTH;
-                else {
-                    let p = getZonePlatform(data.zones);
-                    xPos = p.min + Math.random() * (p.max - p.min);
+            if (!isVIP && foods.length > 300) return;
+
+            const data = FOOD_TYPES[type];
+            let xPos = forcedX ?? null;
+            let yPos = forcedY ?? null;
+
+            if (xPos === null) {
+                if (data.isOceanFood || data.isSky || data.isSpace) {
+                    xPos = Math.random() * WORLD_WIDTH;
+                } else {
+                    xPos = getZoneX(data.zones);
                 }
             }
-            if (!yPos) {
-                if (data.isSky) yPos = SPACE_Y + Math.random() * 1000;
-                else if (data.isSpace) yPos = Math.random() * SPACE_Y;
-                else if (data.isSeaFloor) yPos = SEA_FLOOR - 10;
-                else {
-                    let p = PLATFORMS.find(pl => xPos >= pl.min && xPos <= pl.max);
-                    yPos = p ? p.y - 10 : LAND_Y - 10;
+
+            if (yPos === null) {
+                if (data.isSky) {
+                    yPos = SPACE_Y + Math.random() * 1500;
+                } else if (data.isSpace) {
+                    yPos = Math.random() * SPACE_Y;
+                } else if (data.isOceanFood) {
+                    yPos = SEA_FLOOR_Y - 30 - Math.random() * 120;
+                } else {
+                    yPos = GROUND_Y - Math.random() * 50;
                 }
             }
-            foods.push({ x: xPos, y: yPos, type: type, createdAt: Date.now(), ...data });
+
+            foods.push({
+                x: xPos,
+                y: yPos,
+                type,
+                createdAt: Date.now(),
+                ...data
+            });
         }
 
         function spawnAnimal(specificType = null) {
             if (animals.length > 80) return;
+
             const types = Object.keys(ANIMAL_TYPES);
             const type = specificType || types[Math.floor(Math.random() * types.length)];
             const data = ANIMAL_TYPES[type];
-            let xPos, yPos;
-            if (data.isWaterMob) {
+
+            let xPos;
+            let yPos;
+
+            if (data.isAquaticMob) {
                 xPos = Math.random() * WORLD_WIDTH;
-                yPos = data.isBottomCrawler ? SEA_FLOOR : WATER_LEVEL + 50 + Math.random() * (SEA_FLOOR - WATER_LEVEL - 100);
+                if (data.isBottomWalker) {
+                    yPos = SEA_FLOOR_Y;
+                } else {
+                    yPos = data.minY + Math.random() * (data.maxY - data.minY);
+                }
             } else {
-                let p = getZonePlatform(data.zones);
-                xPos = p.min + 50 + Math.random() * (p.max - p.min - 100);
-                yPos = data.isFlying ? p.y - 100 - Math.random() * 300 : p.y;
+                xPos = getZoneX(data.zones);
+                yPos = data.isFlying
+                    ? data.minY + Math.random() * 300
+                    : GROUND_Y - Math.random() * 50;
             }
-            animals.push({ id: Math.random(), x: xPos, y: yPos, vx: (Math.random() - 0.5) * data.speed, vy: 0, type: type, ...data, direction: Math.random() > 0.5 ? 1 : -1, actionTimer: 0 });
-        }
-        
-        // --- ИНИЦИАЛИЗАЦИЯ ИГРЫ И МИРА ---
-        function initWorld() {
-            foods = []; animals = []; particles = [];
-            timeOfDay = 8000; 
-            for(let i=0; i<50; i++) { spawnFood('flower'); spawnFood('cactus'); spawnFood('ice'); spawnFood('kelp'); }
-            for(let i=0; i<40; i++) spawnFood('cloud');
-            for(let i=0; i<50; i++) { spawnFood('star'); spawnFood('meteor'); spawnFood('planet'); }
-            for(let i=0; i<80; i++) spawnAnimal();
+
+            animals.push({
+                id: Math.random(),
+                x: xPos,
+                y: yPos,
+                vx: (Math.random() - 0.5) * data.speed,
+                vy: 0,
+                type,
+                ...data,
+                direction: Math.random() > 0.5 ? 1 : -1,
+                actionTimer: 0
+            });
         }
 
-        // --- ОБРАБОТЧИКИ СОБЫТИЙ (КЛИКИ, МЫШЬ) ---
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+        function initWorld() {
+            foods = [];
+            animals = [];
+            particles = [];
+            timeOfDay = 8000;
+
+            for (let i = 0; i < 50; i++) {
+                spawnFood('flower');
+                spawnFood('cactus');
+                spawnFood('ice');
+                spawnFood('kelp');
+            }
+
+            for (let i = 0; i < 40; i++) spawnFood('cloud');
+            for (let i = 0; i < 50; i++) {
+                spawnFood('star');
+                spawnFood('meteor');
+                spawnFood('planet');
+            }
+
+            for (let i = 0; i < 80; i++) spawnAnimal();
+        }
+
+        // =========================
+        // УПРАВЛЕНИЕ
+        // =========================
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
         window.dispatchEvent(new Event('resize'));
-        canvas.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
-        canvas.addEventListener('touchmove', (e) => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; });
-        
+
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            mouseX = e.touches[0].clientX;
+            mouseY = e.touches[0].clientY;
+        });
+
         function flap() {
             if (!gameActive) return;
+
             if (player.inWater) {
-                let targetWorldY = mouseY + camera.y;
-                let dy = targetWorldY - player.y;
+                const targetWorldY = mouseY + camera.y;
+                const dy = targetWorldY - player.y;
                 player.vy = dy < 0 ? player.stage.flap * 0.7 : Math.abs(player.stage.flap * 0.5);
-            } else { player.vy = player.stage.flap; }
-            createExplosion(player.x, player.y + player.stage.size, player.inWater ? '#38bdf8' : '#ffffff', 3);
+            } else {
+                player.vy = player.stage.flap;
+            }
+
+            createExplosion(player.x, player.y + player.stage.size, '#ffffff', 3);
         }
+
         canvas.addEventListener('mousedown', flap);
         canvas.addEventListener('touchstart', flap);
 
-        // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (KILLFEED, UI) ---
         function addKillFeed(killer, victim) {
             const feed = document.getElementById('killfeed');
             const msg = document.createElement('div');
@@ -361,29 +447,63 @@
             feed.appendChild(msg);
             setTimeout(() => msg.remove(), 4000);
         }
+
         setInterval(() => {
-            if(!gameActive) return;
-            if(Math.random() < 0.3) {
+            if (!gameActive) return;
+            if (Math.random() < 0.3) {
                 const predators = ['🦅 Сокол', '🦈 Акула', '🐉 Дракон'];
                 const preys = ['🐁 Мышь', '🐧 Пингвин', '🐖 Свинью'];
-                addKillFeed(predators[Math.floor(Math.random()*predators.length)], preys[Math.floor(Math.random()*preys.length)]);
+                addKillFeed(
+                    predators[Math.floor(Math.random() * predators.length)],
+                    preys[Math.floor(Math.random() * preys.length)]
+                );
             }
         }, 8000);
-        
+
+        // =========================
+        // UI / СМЕРТЬ / ЭВОЛЮЦИЯ
+        // =========================
         function updateUI() {
             document.getElementById('player-emoji').textContent = player.stage.emoji;
             document.getElementById('player-name-display').textContent = player.stage.name;
             document.getElementById('score').textContent = player.score;
+
             const req = player.stage.reqXp;
             document.getElementById('xp-fill').style.width = req === 99999 ? '100%' : `${(player.xp / req) * 100}%`;
-            document.getElementById('xp-text').textContent = req === 99999 ? "MAX LEVEL" : `${player.xp} / ${req} XP`;
-            const eatIcons = player.stage.eats.map(f => FOOD_TYPES[f]?.emoji || ANIMAL_TYPES[f]?.emoji || EVOLUTION.find(e=>e.type===f)?.emoji || '🥩');
-            document.getElementById('eats-info').textContent = "ЕСТ: " + eatIcons.join(' ');
+            document.getElementById('xp-text').textContent = req === 99999 ? 'MAX LEVEL' : `${player.xp} / ${req} XP`;
+
+            const eatIcons = player.stage.eats.map(f => {
+                if (FOOD_TYPES[f]) return FOOD_TYPES[f].emoji;
+                if (ANIMAL_TYPES[f]) return ANIMAL_TYPES[f].emoji;
+                const evo = EVOLUTION.find(e => e.type === f);
+                return evo ? evo.emoji : '🥩';
+            });
+
+            document.getElementById('eats-info').textContent = 'ЕСТ: ' + eatIcons.join(' ');
         }
-        
+
+        function checkEvolution() {
+            if (player.xp >= player.stage.reqXp) {
+                const nextStage = EVOLUTION[player.stage.id + 1];
+                if (nextStage) {
+                    player.xp -= player.stage.reqXp;
+                    player.stage = nextStage;
+                    createExplosion(player.x, player.y, '#facc15', 50);
+
+                    const emoji = document.getElementById('player-emoji');
+                    emoji.classList.add('scale-150', 'rotate-12');
+                    setTimeout(() => {
+                        emoji.classList.remove('scale-150', 'rotate-12');
+                    }, 400);
+                }
+            }
+            updateUI();
+        }
+
         function die(reason) {
             gameActive = false;
-            createExplosion(player.x, player.y, '#ef4444', 100); 
+            createExplosion(player.x, player.y, '#ef4444', 100);
+
             setTimeout(() => {
                 document.getElementById('hud').classList.add('hidden');
                 document.getElementById('menu').classList.remove('hidden');
@@ -392,243 +512,432 @@
             }, 1000);
         }
 
-        // ============================
-        // ==== ОСНОВНОЙ ЦИКЛ ИГРЫ ====
-        // ============================
+        // =========================
+        // ЛОГИКА
+        // =========================
         function update() {
             if (!gameActive) return;
 
-            // --- ОБНОВЛЕНИЕ ПАРАМЕТРОВ МИРА ---
-            timeOfDay += 2; if(timeOfDay > 24000) timeOfDay = 0;
-            const OCEAN_CURRENT = Math.sin(Date.now() / 2000) * 1.5;
+            timeOfDay += 2;
+            if (timeOfDay > 24000) timeOfDay = 0;
 
-            // --- ОБНОВЛЕНИЕ ИГРОКА (ФИЗИКА И ЛОГИКА) ---
-            let wasInWater = player.inWater;
-            player.inWater = player.y > WATER_LEVEL;
-            if (!wasInWater && player.inWater && player.vy > 5) { // Всплеск только при быстом падении
-                createExplosion(player.x, WATER_LEVEL, '#e0f2fe', 30, true);
-                player.vy *= 0.2;
-            }
+            player.inWater = player.y >= WATER_SURFACE_Y;
 
-            let targetWorldX = mouseX + camera.x;
-            let dx = targetWorldX - player.x;
+            // -------------------------
+            // Движение игрока
+            // -------------------------
+            const targetWorldX = mouseX + camera.x;
+            const dx = targetWorldX - player.x;
+
             if (Math.abs(dx) > 10) {
                 player.direction = dx > 0 ? 1 : -1;
-                let targetVx = player.direction * player.stage.speed;
-                player.vx += ((player.inWater ? targetVx * 0.5 : targetVx) - player.vx) * 0.1; 
-            } else { player.vx *= 0.9; }
+                const targetVx = player.direction * player.stage.speed;
+                player.vx += ((player.inWater ? targetVx * 0.6 : targetVx) - player.vx) * 0.1;
+            } else {
+                player.vx *= 0.9;
+            }
 
             if (player.inWater) {
-                player.vy += 0.1; player.vy *= 0.9; player.x += OCEAN_CURRENT;
+                player.vy += 0.1;
+                player.vy *= 0.9;
             } else {
-                player.vy += 0.4; player.vy *= 0.96; 
+                player.vy += 0.4;
+                player.vy *= 0.96;
             }
-            
-            player.x += player.vx; player.y += player.vy;
 
-            // --- КОЛЛИЗИИ ИГРОКА С МИРОМ ---
-            // Коллизии с границами мира
-            if (player.x < 0) { player.x = 0; player.vx = 0; }
-            if (player.x > WORLD_WIDTH) { player.x = WORLD_WIDTH; player.vx = 0; }
-            if (player.y < 0) { player.y = 0; player.vy = 0; } 
-            
-            // Коллизия с островами (сверху и снизу, чтобы не застревать)
-            for (let p of PLATFORMS) {
-                if (player.x >= p.min && player.x <= p.max) {
-                    // Коллизия сверху (при падении)
-                    if (player.vy > 0 && player.y >= p.y && player.y - player.vy <= p.y) {
-                        player.y = p.y; player.vy = 0;
-                    }
-                    // Коллизия снизу (при взлете, чтобы не пролететь сквозь) - FIX NOCLIP
-                    if (player.vy < 0 && player.y <= p.y + PLATFORM_THICKNESS && player.y - player.vy > p.y + PLATFORM_THICKNESS) {
-                        player.y = p.y + PLATFORM_THICKNESS; player.vy = 0;
-                    }
-                }
+            player.x += player.vx;
+            player.y += player.vy;
+
+            // -------------------------
+            // Ограничения карты
+            // -------------------------
+            if (player.x < 0) {
+                player.x = 0;
+                player.vx = 0;
             }
-            if (player.y > SEA_FLOOR) { player.y = SEA_FLOOR; player.vy = 0; } // Коллизия с дном
+            if (player.x > WORLD_WIDTH) {
+                player.x = WORLD_WIDTH;
+                player.vx = 0;
+            }
+            if (player.y < 0) {
+                player.y = 0;
+                player.vy = 0;
+            }
 
-            // --- СИСТЕМА КИСЛОРОДА И УГРОЗ ---
+            // Нормальная коллизия с поверхностью суши
+            if (!player.inWater && player.y > GROUND_Y) {
+                player.y = GROUND_Y;
+                player.vy = 0;
+            }
+
+            // Нормальное дно океана
+            if (player.inWater && player.y > SEA_FLOOR_Y) {
+                player.y = SEA_FLOOR_Y;
+                player.vy = 0;
+            }
+
+            // Блок от ноуклипа через нижнюю часть суши
+            if (
+                player.x >= 0 &&
+                player.x <= WORLD_WIDTH &&
+                player.y > GROUND_Y &&
+                player.y < WATER_SURFACE_Y
+            ) {
+                player.y = GROUND_Y;
+                if (player.vy > 0) player.vy = 0;
+            }
+
+            // -------------------------
+            // Кислород
+            // -------------------------
             let isSuffocating = false;
-            let deathMsg = "";
-            if (player.y < SPACE_Y && player.stage.id < 7) { isSuffocating = true; deathMsg = "Задохнулся в вакууме! 🥶"; } 
-            else if (player.inWater && !player.stage.isAquatic) { isSuffocating = true; deathMsg = "Утонул в океане! 🫧"; }
-            else if (!player.inWater && player.stage.isAquatic && player.stage.type !== 'turtle') { isSuffocating = true; deathMsg = "Высох на суше! ☀️"; }
-            
-            if (isSuffocating) {
-                let depthPenalty = player.inWater ? ((player.y - WATER_LEVEL) / 500) : 0;
-                player.oxygen -= (0.3 + depthPenalty); 
-                if (player.oxygen <= 0) die(deathMsg);
-            } else { player.oxygen = Math.min(100, player.oxygen + 1); }
+            let deathMsg = '';
 
-            document.getElementById('o2-fill').style.width = `${Math.max(0, player.oxygen)}%`;
-            document.getElementById('o2-fill').style.background = player.oxygen < 30 ? '#ef4444' : '';
-            
-            // --- ДВИЖЕНИЕ КАМЕРЫ ---
+            if (player.y < SPACE_Y && player.stage.id < 7) {
+                isSuffocating = true;
+                deathMsg = 'Задохнулся в вакууме! 🥶';
+            } else if (player.inWater && !player.stage.isAquatic) {
+                isSuffocating = true;
+                deathMsg = 'Утонул в океане! 🫧';
+            } else if (!player.inWater && player.stage.isAquatic && player.stage.type !== 'turtle') {
+                isSuffocating = true;
+                deathMsg = 'Высох на суше! ☀️';
+            }
+
+            if (isSuffocating) {
+                player.oxygen -= 0.3;
+                if (player.oxygen <= 0) die(deathMsg);
+            } else {
+                player.oxygen = Math.min(100, player.oxygen + 1);
+            }
+
+            const o2Fill = document.getElementById('o2-fill');
+            o2Fill.style.width = `${player.oxygen}%`;
+            o2Fill.style.background = player.oxygen < 30 ? '#ef4444' : '';
+
+            // -------------------------
+            // Камера
+            // -------------------------
             camera.x += (player.x - canvas.width / 2 - camera.x) * 0.1;
             camera.y += (player.y - canvas.height / 2 - camera.y) * 0.1;
+
             camera.x = Math.max(0, Math.min(camera.x, WORLD_WIDTH - canvas.width));
             camera.y = Math.max(0, Math.min(camera.y, WORLD_HEIGHT - canvas.height));
 
-            // --- ОБНОВЛЕНИЕ ЖИВОТНЫХ (AI) ---
+            // -------------------------
+            // Животные
+            // -------------------------
             for (let i = animals.length - 1; i >= 0; i--) {
-                let anim = animals[i];
-                let animInWater = anim.y > WATER_LEVEL;
-                
-                // Физика мобов
-                if (anim.isWaterMob) {
-                    anim.x += anim.vx + OCEAN_CURRENT; anim.y += anim.vy;
-                    if (anim.isBottomCrawler) {
-                        anim.y = SEA_FLOOR; anim.vy = 0;
+                const anim = animals[i];
+                const isAnimInWater = !!anim.isAquaticMob;
+
+                if (isAnimInWater) {
+                    if (anim.isBottomWalker) {
+                        anim.y = SEA_FLOOR_Y;
+                        anim.vy = 0;
+                        anim.x += anim.vx;
                     } else {
-                        if (anim.y < WATER_LEVEL + 50) { anim.y = WATER_LEVEL + 50; anim.vy *= -1; }
-                        if (anim.y > SEA_FLOOR - 50) { anim.y = SEA_FLOOR - 50; anim.vy *= -1; }
+                        anim.x += anim.vx;
+                        anim.y += anim.vy;
+
+                        if (anim.y < anim.minY) {
+                            anim.y = anim.minY;
+                            anim.vy *= -1;
+                        }
+                        if (anim.y > anim.maxY) {
+                            anim.y = anim.maxY;
+                            anim.vy *= -1;
+                        }
                     }
-                } else { // Сухопутные и летающие
+
+                    anim.x += Math.sin(Date.now() / 2000) * 0.2;
+                } else {
                     if (!anim.isFlying) anim.vy += 0.4;
-                    anim.x += anim.vx; anim.y += anim.vy;
-                    
-                    let p = PLATFORMS.find(pl => anim.x >= pl.min && anim.x <= pl.max);
-                    if (p) {
-                         // Коллизия с землей
-                        if (anim.y > p.y && !anim.isFlying) { anim.y = p.y; anim.vy = 0; }
-                        // FIX: Не падают с обрывов
-                        if (!anim.isFlying && (anim.x < p.min + 20 || anim.x > p.max - 20)) anim.vx *= -1;
-                        // FIX: Выталкиваем застрявших мобов
-                        if (anim.y > p.y && anim.y < p.y + PLATFORM_THICKNESS) anim.y = p.y;
+
+                    anim.x += anim.vx;
+                    anim.y += anim.vy;
+
+                    if (!anim.isFlying && anim.y > anim.minY) {
+                        anim.y = anim.minY;
+                        anim.vy = 0;
+                        if (Math.random() < 0.02) anim.vy = anim.jump;
+                    }
+
+                    if (anim.isFlying && anim.y < SPACE_Y + 100) {
+                        anim.y = SPACE_Y + 100;
+                        anim.vy *= -1;
                     }
                 }
 
+                // Границы мира
+                if (anim.x < 0) {
+                    anim.x = 0;
+                    anim.vx *= -1;
+                }
+                if (anim.x > WORLD_WIDTH) {
+                    anim.x = WORLD_WIDTH;
+                    anim.vx *= -1;
+                }
+
                 anim.actionTimer--;
-                let isHunting = false;
+
                 const distToPlayer = Math.hypot(player.x - anim.x, player.y - anim.y);
-                
+                let isHunting = false;
+
                 if (anim.eats && anim.eats.includes(player.stage.type) && distToPlayer < 600) {
-                    isHunting = true;
-                    // FIX: Орлы больше не ныряют
-                    if (anim.type === 'eagle' && player.inWater) {
-                        isHunting = false;
-                    } else {
+                    if (!(anim.type === 'eagle' && player.inWater)) {
+                        isHunting = true;
                         anim.direction = player.x > anim.x ? 1 : -1;
-                        anim.vx = anim.direction * anim.speed * 1.2; 
-                        if (anim.isFlying || anim.isWaterMob) anim.vy += (player.y - anim.y - 10) * 0.01; 
-                        
+                        anim.vx = anim.direction * anim.speed * 1.2;
+
+                        if (anim.isFlying || isAnimInWater) {
+                            anim.vy = (player.y - anim.y) * 0.05;
+                        }
+
                         if (distToPlayer < player.stage.size + anim.size * 0.5) {
-                            addKillFeed(anim.emoji + " " + anim.name, player.stage.name);
-                            die(`Вас сожрал ${anim.name}! 💀`); return; 
+                            addKillFeed(anim.emoji + ' ' + anim.type, player.stage.name);
+                            die(`Вас сожрал ${anim.type}! 💀`);
+                            return;
                         }
                     }
                 }
+
                 if (!isHunting && anim.actionTimer <= 0) {
                     anim.actionTimer = 60 + Math.random() * 100;
                     anim.direction = Math.random() > 0.5 ? 1 : -1;
                     anim.vx = anim.direction * anim.speed;
-                    if (anim.isFlying || (anim.isWaterMob && !anim.isBottomCrawler)) anim.vy = (Math.random() - 0.5) * anim.speed; 
+
+                    if (anim.isFlying || isAnimInWater) {
+                        anim.vy = (Math.random() - 0.5) * anim.speed;
+                    }
                 }
 
-                if (anim.x < 0 || anim.x > WORLD_WIDTH) anim.vx *= -1;
-
+                // Генерация какашек
                 if ((anim.type === 'pig' || anim.type === 'mouse' || anim.type === 'camel') && Math.random() < 0.003) {
                     spawnFood('poop', anim.x, anim.y, true);
                 }
 
+                // Игрок ест животное
                 if (distToPlayer < player.stage.size + anim.size && player.stage.eats.includes(anim.type)) {
-                    player.xp += anim.xp; player.score += anim.xp;
-                    createExplosion(anim.x, anim.y, '#ef4444', 20); 
-                    animals.splice(i, 1); checkEvolution();
+                    player.xp += anim.xp;
+                    player.score += anim.xp;
+                    createExplosion(anim.x, anim.y, '#ef4444', 20);
+                    animals.splice(i, 1);
+                    checkEvolution();
                 }
             }
 
-            // --- ОБНОВЛЕНИЕ ЕДЫ (СБОР И GC) ---
-            const now = Date.now();
+            // -------------------------
+            // Еда
+            // -------------------------
             for (let i = foods.length - 1; i >= 0; i--) {
                 const food = foods[i];
-                if (food.type === 'poop' && now - food.createdAt > 15000) { foods.splice(i, 1); continue; }
-                if (food.floatSpeed) food.x -= food.floatSpeed; 
-                if (food.x < -200) food.x = WORLD_WIDTH + 200; 
+
+                // удаление старых какашек
+                if (food.type === 'poop' && Date.now() - food.createdAt > 15000) {
+                    foods.splice(i, 1);
+                    continue;
+                }
+
+                if (food.floatSpeed) food.x -= food.floatSpeed;
+                if (food.x < -200) food.x = WORLD_WIDTH + 200;
+
+                if (!food.isSky && !food.isSpace && !food.isOceanFood && food.y > GROUND_Y) {
+                    food.y = GROUND_Y - 10;
+                }
+
+                if (food.isOceanFood) {
+                    if (food.y < WATER_SURFACE_Y + 40) food.y = WATER_SURFACE_Y + 40;
+                    if (food.y > SEA_FLOOR_Y - 20) food.y = SEA_FLOOR_Y - 20;
+                }
 
                 const dist = Math.hypot(player.x - food.x, player.y - food.y);
+
                 if (dist < player.stage.size + food.size && player.stage.eats.includes(food.type)) {
-                    player.xp += food.xp; player.score += food.xp;
-                    createExplosion(food.x, food.y, '#22c55e', 10); 
-                    foods.splice(i, 1); checkEvolution();
+                    player.xp += food.xp;
+                    player.score += food.xp;
+                    createExplosion(food.x, food.y, '#22c55e', 10);
+                    foods.splice(i, 1);
+                    checkEvolution();
                 }
             }
+
             if (animals.length < 80 && Math.random() < 0.03) spawnAnimal();
-            particles.forEach((p, i) => { p.update(); if(p.life <= 0) particles.splice(i, 1); });
+
+            particles.forEach((p, i) => {
+                p.update();
+                if (p.life <= 0) particles.splice(i, 1);
+            });
         }
 
-        // --- ФУНКЦИЯ ОТРИСОВКИ (RENDER) ---
+        // =========================
+        // ОТРИСОВКА
+        // =========================
         function draw() {
-            let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            let darkness = 0;
-            if (timeOfDay > 12000 && timeOfDay < 20000) darkness = (timeOfDay - 12000) / 4000; 
-            if (timeOfDay >= 20000 || timeOfDay < 4000) darkness = 1; 
-            if (timeOfDay >= 4000 && timeOfDay <= 8000) darkness = 1 - ((timeOfDay - 4000) / 4000); 
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
 
-            if (camera.y < SPACE_Y) { 
-                skyGradient.addColorStop(0, '#000000'); skyGradient.addColorStop(1, '#0f172a'); 
-            } else { 
-                let r1=Math.floor(30*(1-darkness)), g1=Math.floor(58*(1-darkness)), b1=Math.floor(138*(1-darkness));
-                let r2=Math.floor(135*(1-darkness)), g2=Math.floor(206*(1-darkness)), b2=Math.floor(235*(1-darkness));
-                skyGradient.addColorStop(0, `rgb(${r1},${g1},${b1})`); skyGradient.addColorStop(1, `rgb(${r2},${g2},${b2})`); 
+            let darkness = 0;
+            if (timeOfDay > 12000 && timeOfDay < 20000) darkness = (timeOfDay - 12000) / 4000;
+            if (timeOfDay >= 20000 || timeOfDay < 4000) darkness = 1;
+            if (timeOfDay >= 4000 && timeOfDay <= 8000) darkness = 1 - ((timeOfDay - 4000) / 4000);
+            if (darkness > 1) darkness = 1;
+
+            if (camera.y < SPACE_Y) {
+                skyGradient.addColorStop(0, '#000000');
+                skyGradient.addColorStop(1, '#0f172a');
+            } else {
+                const r1 = Math.floor(30 * (1 - darkness));
+                const g1 = Math.floor(58 * (1 - darkness));
+                const b1 = Math.floor(138 * (1 - darkness));
+
+                const r2 = Math.floor(135 * (1 - darkness));
+                const g2 = Math.floor(206 * (1 - darkness));
+                const b2 = Math.floor(235 * (1 - darkness));
+
+                skyGradient.addColorStop(0, `rgb(${r1},${g1},${b1})`);
+                skyGradient.addColorStop(1, `rgb(${r2},${g2},${b2})`);
             }
-            ctx.fillStyle = skyGradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             if (camera.y < SPACE_Y + 500 || darkness > 0.5) {
                 ctx.fillStyle = `rgba(255, 255, 255, ${camera.y < SPACE_Y ? 1 : darkness})`;
-                for(let i=0; i<100; i++) { ctx.fillRect((i * 137) % canvas.width, (i * 93) % canvas.height, 2, 2); }
+                for (let i = 0; i < 100; i++) {
+                    ctx.fillRect((i * 137) % canvas.width, (i * 93) % canvas.height, 2, 2);
+                }
             }
 
-            ctx.save(); ctx.translate(-camera.x, -camera.y);
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
 
-            PLATFORMS.forEach(p => {
-                ctx.fillStyle = p.color; ctx.fillRect(p.min, p.y, p.max - p.min, PLATFORM_THICKNESS + 50);
-            });
-            
-            ctx.fillStyle = 'rgba(3, 105, 161, 0.7)'; ctx.fillRect(0, WATER_LEVEL, WORLD_WIDTH, SEA_FLOOR - WATER_LEVEL);
-            ctx.fillStyle = '#b45309'; ctx.fillRect(0, SEA_FLOOR, WORLD_WIDTH, WORLD_HEIGHT - SEA_FLOOR);
+            // СУША
+            ctx.fillStyle = BIOME_FOREST.color;
+            ctx.fillRect(BIOME_FOREST.min, GROUND_Y, BIOME_FOREST.max - BIOME_FOREST.min, WATER_SURFACE_Y - GROUND_Y);
 
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = BIOME_DESERT.color;
+            ctx.fillRect(BIOME_DESERT.min, GROUND_Y, BIOME_DESERT.max - BIOME_DESERT.min, WATER_SURFACE_Y - GROUND_Y);
+
+            ctx.fillStyle = BIOME_SNOW.color;
+            ctx.fillRect(BIOME_SNOW.min, GROUND_Y, BIOME_SNOW.max - BIOME_SNOW.min, WATER_SURFACE_Y - GROUND_Y);
+
+            // ВОДА ВНИЗУ
+            ctx.fillStyle = 'rgba(3, 105, 161, 0.72)';
+            ctx.fillRect(0, WATER_SURFACE_Y, WORLD_WIDTH, SEA_FLOOR_Y - WATER_SURFACE_Y);
+
+            // ДНО ОКЕАНА
+            ctx.fillStyle = '#b45309';
+            ctx.fillRect(0, SEA_FLOOR_Y, WORLD_WIDTH, WORLD_HEIGHT - SEA_FLOOR_Y);
+
+            // ЕДА
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
             foods.forEach(food => {
-                ctx.font = `${food.size * 2}px Arial`; ctx.fillText(food.emoji, food.x, food.y);
+                ctx.font = `${food.size * 2}px Arial`;
+                ctx.fillText(food.emoji, food.x, food.y);
+
+                if (player.stage.eats.includes(food.type)) {
+                    ctx.strokeStyle = '#4ade80';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(food.x, food.y, food.size * 1.4, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
             });
 
+            // ЖИВОТНЫЕ
             animals.forEach(anim => {
-                ctx.save(); ctx.translate(anim.x, anim.y); ctx.scale(anim.direction, 1); 
-                if(!anim.isFlying && anim.vy === 0 && anim.vx !== 0 && !anim.isBottomCrawler) ctx.rotate(Math.sin(Date.now() / 100) * 0.1);
-                ctx.font = `${anim.size * 2}px Arial`; ctx.fillText(anim.emoji, 0, 0); ctx.restore();
+                ctx.save();
+                ctx.translate(anim.x, anim.y);
+                ctx.scale(anim.direction, 1);
+
+                if (!anim.isFlying && anim.vy === 0 && anim.vx !== 0 && !anim.isBottomWalker) {
+                    ctx.rotate(Math.sin(Date.now() / 100) * 0.1);
+                }
+
+                ctx.font = `${anim.size * 2}px Arial`;
+                ctx.fillText(anim.emoji, 0, 0);
+                ctx.restore();
+
+                if (player.stage.eats.includes(anim.type)) {
+                    ctx.strokeStyle = '#4ade80';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(anim.x, anim.y, anim.size * 1.3, 0, Math.PI * 2);
+                    ctx.stroke();
+                } else if (anim.eats && anim.eats.includes(player.stage.type)) {
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.lineWidth = 5;
+                    ctx.setLineDash([10, 5]);
+                    ctx.beginPath();
+                    ctx.arc(anim.x, anim.y, anim.size * 1.5, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
             });
 
+            // ЧАСТИЦЫ
             particles.forEach(p => p.draw(ctx));
 
-            ctx.save(); ctx.translate(player.x, player.y); ctx.scale(player.direction, 1); ctx.rotate(player.vy * 0.03); 
+            // ИГРОК
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.scale(player.direction, 1);
+            ctx.rotate(player.vy * 0.03);
             ctx.font = `${player.stage.size * 2}px Arial`;
-            if(player.stage.size >= 60) { ctx.shadowColor = player.stage.type === 'god' ? '#ffffff' : '#ef4444'; ctx.shadowBlur = 30; }
-            ctx.fillText(player.stage.emoji, 0, 0); ctx.restore(); 
 
-            ctx.fillStyle = 'white'; ctx.font = '900 18px Nunito'; ctx.lineWidth = 4; ctx.strokeStyle = 'black';
+            if (player.stage.size >= 60) {
+                ctx.shadowColor = player.stage.type === 'god' ? '#ffffff' : '#ef4444';
+                ctx.shadowBlur = 30;
+            }
+
+            ctx.fillText(player.stage.emoji, 0, 0);
+            ctx.restore();
+
+            // Имя игрока
+            ctx.fillStyle = 'white';
+            ctx.font = '900 18px Nunito';
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = 'black';
             ctx.strokeText(player.stage.name, player.x, player.y - player.stage.size - 15);
             ctx.fillText(player.stage.name, player.x, player.y - player.stage.size - 15);
 
-            ctx.restore(); 
+            ctx.restore();
 
             if (darkness > 0 && camera.y > SPACE_Y) {
-                ctx.fillStyle = `rgba(0, 0, 10, ${darkness * 0.5})`; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = `rgba(0, 0, 10, ${darkness * 0.5})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
             if (gameActive) requestAnimationFrame(gameLoop);
         }
 
-        // --- ТОЧКА ВХОДА И ЗАПУСК ИГРЫ ---
-        function gameLoop() { update(); draw(); }
+        function gameLoop() {
+            update();
+            draw();
+        }
+
         document.getElementById('btn-play').onclick = () => {
-            document.getElementById('menu').classList.add('hidden'); 
+            document.getElementById('menu').classList.add('hidden');
             document.getElementById('hud').classList.remove('hidden');
-            player.stage = EVOLUTION[0]; player.xp = 0; player.score = 0; player.oxygen = 100;
-            player.x = 1000; player.y = LAND_Y - 50; player.vx = 0; player.vy = 0;
-            initWorld(); updateUI(); gameActive = true; gameLoop();
+
+            player.stage = EVOLUTION[0];
+            player.xp = 0;
+            player.score = 0;
+            player.oxygen = 100;
+            player.x = 1000;
+            player.y = GROUND_Y - 50;
+            player.vx = 0;
+            player.vy = 0;
+
+            initWorld();
+            updateUI();
+            gameActive = true;
+            gameLoop();
         };
-        draw(); // Первоначальная отрисовка меню
+
+        draw();
     </script>
 </body>
 </html>
