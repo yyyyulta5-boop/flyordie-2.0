@@ -3,102 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EvoWorld Clone</title>
+    <title>EvoWorld - Cosmic Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap');
         
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            background-color: #87CEEB; /* Цвет неба */
-            font-family: 'Nunito', sans-serif; 
-            user-select: none;
-            touch-action: none;
-        }
-
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Nunito', sans-serif; user-select: none; touch-action: none; }
         canvas { display: block; }
 
-        /* Красивое меню */
-        #menu {
-            background: radial-gradient(circle, rgba(135,206,235,0.9) 0%, rgba(30,144,255,0.9) 100%);
-            backdrop-filter: blur(5px);
-        }
+        #menu { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); }
 
         .btn-play {
-            background: linear-gradient(to bottom, #4ade80, #16a34a);
-            box-shadow: 0 6px 0 #15803d, 0 15px 20px rgba(0,0,0,0.2);
+            background: linear-gradient(to bottom, #3b82f6, #2563eb);
+            box-shadow: 0 6px 0 #1e3a8a, 0 15px 20px rgba(0,0,0,0.5);
             transition: all 0.1s;
         }
-        .btn-play:active {
-            transform: translateY(6px);
-            box-shadow: 0 0px 0 #15803d, 0 5px 10px rgba(0,0,0,0.2);
-        }
+        .btn-play:active { transform: translateY(6px); box-shadow: 0 0px 0 #1e3a8a; }
 
-        /* Полоса опыта */
-        .xp-bar-container {
-            width: 300px;
-            height: 24px;
-            background: rgba(0,0,0,0.5);
-            border: 3px solid #333;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
+        /* Полосы интерфейса */
+        .bar-container {
+            width: 250px; height: 20px;
+            background: rgba(0,0,0,0.6);
+            border: 2px solid #555; border-radius: 10px;
+            overflow: hidden; position: relative; margin-top: 4px;
         }
-        .xp-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #facc15, #f59e0b);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        .xp-text {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 14px;
-            font-weight: 900;
-            text-shadow: 1px 1px 2px black;
+        .xp-fill { height: 100%; background: linear-gradient(90deg, #facc15, #f59e0b); transition: width 0.2s; }
+        .o2-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #0284c7); transition: width 0.1s; }
+        
+        .bar-text {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; font-size: 12px; font-weight: 900; text-shadow: 1px 1px 2px black;
         }
     </style>
 </head>
 <body>
 
-    <!-- ИГРОВОЙ ИНТЕРФЕЙС (HUD) -->
+    <!-- ИНТЕРФЕЙС -->
     <div id="hud" class="fixed top-0 left-0 w-full p-4 flex justify-between items-start z-10 hidden pointer-events-none">
-        <div class="flex items-center gap-4">
-            <div id="player-emoji" class="text-5xl drop-shadow-lg bg-white/20 p-2 rounded-2xl border-2 border-white/30">🪰</div>
+        <div class="flex items-start gap-4">
+            <div id="player-emoji" class="text-6xl drop-shadow-lg bg-white/10 p-2 rounded-2xl border-2 border-white/20">🪰</div>
             <div>
-                <h2 id="player-name-display" class="text-white text-2xl font-black drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">Муха</h2>
-                <div class="xp-bar-container mt-1">
-                    <div id="xp-fill" class="xp-bar-fill"></div>
-                    <div id="xp-text" class="xp-text">0 / 30 XP</div>
+                <h2 id="player-name-display" class="text-white text-2xl font-black drop-shadow-md">Муха</h2>
+                
+                <!-- Полоса Опыта -->
+                <div class="bar-container">
+                    <div id="xp-fill" class="xp-fill" style="width: 0%;"></div>
+                    <div id="xp-text" class="bar-text">0 / 30 XP</div>
                 </div>
-                <p id="eats-info" class="text-green-300 text-sm font-bold mt-1 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">Ест: 💩</p>
+
+                <!-- Полоса Кислорода -->
+                <div class="bar-container border-blue-400">
+                    <div id="o2-fill" class="o2-fill" style="width: 100%;"></div>
+                    <div id="o2-text" class="bar-text text-blue-100">OXYGEN</div>
+                </div>
+
+                <p id="eats-info" class="text-green-400 text-sm font-bold mt-2 drop-shadow-md">Ест: 💩</p>
             </div>
         </div>
-        <div class="text-right">
-            <p class="text-white text-xl font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">Счет: <span id="score">0</span></p>
+        <div class="text-right bg-black/50 p-3 rounded-xl border border-white/10">
+            <p class="text-gray-400 text-xs font-bold uppercase">Счет</p>
+            <p class="text-white text-3xl font-black"><span id="score">0</span></p>
         </div>
     </div>
 
-    <!-- ГЛАВНОЕ МЕНЮ -->
+    <!-- МЕНЮ -->
     <div id="menu" class="fixed inset-0 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm w-full border-4 border-blue-200">
-            <h1 class="text-5xl font-black text-blue-500 mb-2 italic">EVO<span class="text-green-500">WORLD</span></h1>
-            <p class="text-gray-500 font-bold mb-6 text-sm uppercase tracking-wider">Выживай и эволюционируй</p>
+        <div class="bg-gray-900 p-8 rounded-3xl shadow-2xl text-center max-w-md w-full border-4 border-gray-700">
+            <h1 class="text-5xl font-black text-blue-400 mb-2 italic tracking-tighter">EVO<span class="text-yellow-400">COSMOS</span></h1>
+            <p id="death-reason" class="text-red-400 font-bold mb-6 uppercase hidden">Вы погибли!</p>
             
-            <input type="text" id="name-input" placeholder="Твое имя..." class="w-full bg-gray-100 border-2 border-gray-300 p-4 rounded-xl mb-6 font-bold text-lg text-center focus:outline-none focus:border-blue-500">
+            <button id="btn-play" class="btn-play w-full text-white font-black text-2xl py-4 rounded-xl uppercase tracking-widest mt-4">Играть</button>
             
-            <button id="btn-play" class="btn-play w-full text-white font-black text-2xl py-4 rounded-xl uppercase tracking-widest">Играть</button>
-            
-            <div class="mt-8 text-left bg-gray-50 p-4 rounded-xl border border-gray-200">
-                <h3 class="font-bold text-gray-700 mb-2">Как играть:</h3>
-                <ul class="text-sm text-gray-600 space-y-1 font-bold">
-                    <li>🖱️ Курсор указывает направление</li>
-                    <li>👆 Зажми левую кнопку мыши (или тап), чтобы лететь</li>
-                    <li>🟢 Ешь то, что подсвечено зеленым</li>
-                    <li>🔴 Убегай от тех, кто подсвечен красным!</li>
+            <div class="mt-8 text-left bg-gray-800 p-4 rounded-xl border border-gray-600 text-gray-300">
+                <h3 class="font-bold text-white mb-2">Механика:</h3>
+                <ul class="text-sm space-y-2 font-bold">
+                    <li>🖱️ Укажи мышкой направление</li>
+                    <li>👆 <b>КЛИКАЙ</b> чтобы взмахнуть крыльями!</li>
+                    <li>🌌 На самом верху карты — космос. Там нужен кислород!</li>
                 </ul>
             </div>
         </div>
@@ -110,117 +91,108 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // --- 1. НАСТРОЙКИ ИГРЫ И ЭВОЛЮЦИИ ---
-        const WORLD_WIDTH = 3000;
-        const WORLD_HEIGHT = 1500;
-        const GROUND_Y = WORLD_HEIGHT - 200;
+        // --- 1. НАСТРОЙКИ МИРА ---
+        const WORLD_WIDTH = 4000;
+        const WORLD_HEIGHT = 4000;
+        const GROUND_Y = 3800; // Земля в самом низу
+        const SPACE_Y = 1500;  // Линия, выше которой начинается космос
 
-        // Пищевая цепь. Кто кого ест и сколько нужно опыта.
+        // --- 2. ЭВОЛЮЦИЯ (Добавил Космос) ---
+        // flap - сила прыжка при клике
         const EVOLUTION = [
-            { id: 0, name: "Муха", emoji: "🪰", size: 25, speed: 6, reqXp: 30, eats: ['poop'] },
-            { id: 1, name: "Бабочка", emoji: "🦋", size: 30, speed: 7, reqXp: 80, eats: ['flower'] },
-            { id: 2, name: "Птичка", emoji: "🐦", size: 40, speed: 8, reqXp: 180, eats: ['fly', 'bug'] },
-            { id: 3, name: "Сокол", emoji: "🦅", size: 55, speed: 10, reqXp: 400, eats: ['bird', 'butterfly', 'mouse'] },
-            { id: 4, name: "Дракон", emoji: "🐉", size: 80, speed: 12, reqXp: 9999, eats: ['eagle', 'bird', 'pig'] }
+            { id: 0, name: "Муха", emoji: "🪰", size: 20, speed: 6, flap: -8, reqXp: 30, eats: ['poop'] },
+            { id: 1, name: "Бабочка", emoji: "🦋", size: 30, speed: 7, flap: -9, reqXp: 80, eats: ['flower'] },
+            { id: 2, name: "Птичка", emoji: "🐦", size: 40, speed: 9, flap: -10, reqXp: 200, eats: ['fly', 'bug'] },
+            { id: 3, name: "Сокол", emoji: "🦅", size: 60, speed: 12, flap: -12, reqXp: 500, eats: ['bird', 'butterfly', 'mouse'] },
+            { id: 4, name: "Дракон", emoji: "🐉", size: 90, speed: 15, flap: -14, reqXp: 1200, eats: ['eagle', 'bird', 'pig', 'cloud'] },
+            // КОСМИЧЕСКИЙ УРОВЕНЬ
+            { id: 5, name: "Пришелец", emoji: "👽", size: 100, speed: 18, flap: -16, reqXp: 3000, eats: ['dragon', 'star'] },
+            { id: 6, name: "НЛО", emoji: "🛸", size: 130, speed: 22, flap: -18, reqXp: 8000, eats: ['alien', 'meteor'] },
+            { id: 7, name: "Божество", emoji: "🌌", size: 180, speed: 25, flap: -20, reqXp: 99999, eats: ['ufo', 'planet'] }
         ];
 
-        // Типы еды (статичная)
+        // Типы еды и зоны их появления (minY, maxY)
         const FOOD_TYPES = {
-            'poop': { emoji: '💩', size: 15, xp: 5 },
-            'flower': { emoji: '🌺', size: 20, xp: 10 },
-            'bug': { emoji: '🪲', size: 15, xp: 15 },
-            'mouse': { emoji: '🐁', size: 25, xp: 25 },
-            'pig': { emoji: '🐖', size: 40, xp: 50 }
+            'poop':   { emoji: '💩', size: 15, xp: 5,   minY: GROUND_Y-50, maxY: GROUND_Y },
+            'flower': { emoji: '🌺', size: 20, xp: 10,  minY: GROUND_Y-100, maxY: GROUND_Y },
+            'bug':    { emoji: '🪲', size: 15, xp: 15,  minY: GROUND_Y-500, maxY: GROUND_Y },
+            'mouse':  { emoji: '🐁', size: 25, xp: 25,  minY: GROUND_Y-50, maxY: GROUND_Y },
+            'pig':    { emoji: '🐖', size: 40, xp: 50,  minY: GROUND_Y-50, maxY: GROUND_Y },
+            'cloud':  { emoji: '☁️', size: 60, xp: 100, minY: SPACE_Y, maxY: GROUND_Y-800 }, // Небо
+            'star':   { emoji: '⭐', size: 30, xp: 200, minY: 0, maxY: SPACE_Y }, // Космос
+            'meteor': { emoji: '☄️', size: 50, xp: 500, minY: 0, maxY: SPACE_Y },
+            'planet': { emoji: '🪐', size: 100,xp: 1500,minY: 0, maxY: SPACE_Y-500 }
         };
 
-        // --- 2. ПЕРЕМЕННЫЕ СОСТОЯНИЯ ---
+        // --- 3. СОСТОЯНИЕ ИГРЫ ---
         let gameActive = false;
         let mouseX = 0; let mouseY = 0;
-        let isFlying = false; // Нажата ли кнопка мыши
         let camera = { x: 0, y: 0 };
         
         let player = {
-            x: WORLD_WIDTH / 2,
-            y: GROUND_Y - 100,
+            x: WORLD_WIDTH / 2, y: GROUND_Y - 100,
             vx: 0, vy: 0,
             stage: EVOLUTION[0],
-            xp: 0,
-            score: 0,
-            direction: 1 // 1 вправо, -1 влево
+            xp: 0, score: 0,
+            direction: 1,
+            oxygen: 100
         };
 
-        let foods = []; // Статичная еда
-        let bots = [];  // Другие мобы (ИИ)
+        let foods = []; let bots = [];
 
-        // --- 3. ГЕНЕРАЦИЯ МИРА ---
+        // --- 4. ГЕНЕРАЦИЯ ---
         function spawnFood() {
-            if (foods.length > 100) return; // Лимит еды
+            if (foods.length > 150) return;
             const types = Object.keys(FOOD_TYPES);
             const type = types[Math.floor(Math.random() * types.length)];
-            // Еда спавнится ближе к земле
+            const data = FOOD_TYPES[type];
             foods.push({
                 x: Math.random() * WORLD_WIDTH,
-                y: GROUND_Y - 10 - Math.random() * 300,
-                type: type,
-                ...FOOD_TYPES[type]
-            });
-        }
-
-        function spawnBot() {
-            if (bots.length > 30) return; // Лимит ботов
-            // Выбираем случайную стадию от Мухи до Птички (чтобы не было сразу драконов)
-            const stage = EVOLUTION[Math.floor(Math.random() * 3)];
-            bots.push({
-                x: Math.random() * WORLD_WIDTH,
-                y: Math.random() * (GROUND_Y - 100),
-                vx: (Math.random() - 0.5) * 4,
-                vy: (Math.random() - 0.5) * 4,
-                stage: stage,
-                type: stage.name.toLowerCase() === 'муха' ? 'fly' : (stage.name.toLowerCase() === 'бабочка' ? 'butterfly' : 'bird')
+                y: data.minY + Math.random() * (data.maxY - data.minY),
+                type: type, ...data
             });
         }
 
         function initWorld() {
             foods = []; bots = [];
-            for(let i=0; i<80; i++) spawnFood();
-            for(let i=0; i<20; i++) spawnBot();
+            for(let i=0; i<150; i++) spawnFood();
         }
 
-        // --- 4. УПРАВЛЕНИЕ ---
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+        // --- 5. УПРАВЛЕНИЕ (КЛИК = ВЗМАХ) ---
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
         window.dispatchEvent(new Event('resize'));
 
         canvas.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
         canvas.addEventListener('touchmove', (e) => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; });
         
-        const startFlying = () => isFlying = true;
-        const stopFlying = () => isFlying = false;
-        
-        canvas.addEventListener('mousedown', startFlying);
-        canvas.addEventListener('mouseup', stopFlying);
-        canvas.addEventListener('touchstart', startFlying);
-        canvas.addEventListener('touchend', stopFlying);
+        function flap() {
+            if (!gameActive) return;
+            // Целимся туда, где мышка
+            let targetWorldX = mouseX + camera.x;
+            let dx = targetWorldX - player.x;
+            
+            player.direction = dx > 0 ? 1 : -1;
+            
+            // Взмах вверх!
+            player.vy = player.stage.flap;
+            // Горизонтальный рывок в сторону мыши
+            player.vx = player.direction * player.stage.speed;
+        }
 
-        // --- 5. ЛОГИКА ИГРЫ (ОБНОВЛЕНИЕ) ---
+        canvas.addEventListener('mousedown', flap);
+        canvas.addEventListener('touchstart', flap);
+
+        // --- 6. ЛОГИКА ---
         function updateUI() {
             document.getElementById('player-emoji').textContent = player.stage.emoji;
             document.getElementById('player-name-display').textContent = player.stage.name;
             document.getElementById('score').textContent = player.score;
             
             const req = player.stage.reqXp;
-            const progress = req === 9999 ? 100 : (player.xp / req) * 100;
-            document.getElementById('xp-fill').style.width = `${progress}%`;
-            document.getElementById('xp-text').textContent = req === 9999 ? "MAX LEVEL" : `${player.xp} / ${req} XP`;
+            document.getElementById('xp-fill').style.width = req === 99999 ? '100%' : `${(player.xp / req) * 100}%`;
+            document.getElementById('xp-text').textContent = req === 99999 ? "MAX" : `${player.xp} / ${req} XP`;
 
-            // Показываем, что ест текущий уровень
-            const eatEmojis = player.stage.eats.map(food => {
-                if(FOOD_TYPES[food]) return FOOD_TYPES[food].emoji;
-                const botStage = EVOLUTION.find(s => s.name.toLowerCase() === food || (food === 'fly' && s.id===0) || (food === 'butterfly' && s.id===1) || (food === 'bird' && s.id===2));
-                return botStage ? botStage.emoji : food;
-            });
+            const eatEmojis = player.stage.eats.map(f => FOOD_TYPES[f] ? FOOD_TYPES[f].emoji : '🥩');
             document.getElementById('eats-info').textContent = "Ест: " + eatEmojis.join(' ');
         }
 
@@ -230,7 +202,6 @@
                 if (nextStage) {
                     player.xp -= player.stage.reqXp;
                     player.stage = nextStage;
-                    // Небольшой эффект при эволюции
                     document.getElementById('player-emoji').classList.add('scale-150');
                     setTimeout(() => document.getElementById('player-emoji').classList.remove('scale-150'), 300);
                 }
@@ -238,207 +209,155 @@
             updateUI();
         }
 
-        function gameOver() {
+        function die(reason) {
             gameActive = false;
             document.getElementById('hud').classList.add('hidden');
             document.getElementById('menu').classList.remove('hidden');
-            document.getElementById('btn-play').textContent = "Возродиться";
+            document.getElementById('death-reason').textContent = reason;
+            document.getElementById('death-reason').classList.remove('hidden');
         }
 
         function update() {
             if (!gameActive) return;
 
-            // Движение игрока
-            let targetWorldX = mouseX + camera.x;
-            let targetWorldY = mouseY + camera.y;
-            
-            let dx = targetWorldX - player.x;
-            let dy = targetWorldY - player.y;
-            let dist = Math.hypot(dx, dy);
-
-            if (dx !== 0) player.direction = dx > 0 ? 1 : -1;
-
-            if (isFlying && dist > 10) {
-                // Полет к мышке
-                player.vx += (dx / dist) * player.stage.speed * 0.1;
-                player.vy += (dy / dist) * player.stage.speed * 0.1;
-            }
-
-            player.vy += 0.2; // Гравитация (слабая)
+            // ФИЗИКА: Гравитация постоянно тянет вниз
+            player.vy += 0.4; // Сила тяжести
+            player.vx *= 0.96; // Сопротивление воздуха (торможение)
             
             player.x += player.vx;
             player.y += player.vy;
-            
-            // Трение/Сопротивление воздуха
-            player.vx *= 0.92;
-            player.vy *= 0.92;
 
             // Ограничения карты
             if (player.x < 0) { player.x = 0; player.vx = 0; }
             if (player.x > WORLD_WIDTH) { player.x = WORLD_WIDTH; player.vx = 0; }
-            if (player.y < 0) { player.y = 0; player.vy = 0; }
+            if (player.y < 0) { player.y = 0; player.vy = 0; } // Потолок космоса
             if (player.y > GROUND_Y) { player.y = GROUND_Y; player.vy = 0; } // Пол
 
-            // Обновление камеры (плавное следование)
+            // КИСЛОРОД В КОСМОСЕ
+            if (player.y < SPACE_Y) {
+                // Если мы не пришелец/НЛО/Божество, задыхаемся
+                if (player.stage.id < 5) {
+                    player.oxygen -= 0.3; // Тратим кислород
+                    if (player.oxygen <= 0) die("Задохнулся в космосе! 🥶");
+                } else {
+                    player.oxygen = 100; // Космическим существам не нужен кислород
+                }
+            } else {
+                player.oxygen = Math.min(100, player.oxygen + 1); // Восстанавливаем в атмосфере
+            }
+            document.getElementById('o2-fill').style.width = `${player.oxygen}%`;
+            document.getElementById('o2-fill').style.background = player.oxygen < 30 ? 'red' : '';
+
+            // КАМЕРА (следит за игроком)
             camera.x += (player.x - canvas.width / 2 - camera.x) * 0.1;
             camera.y += (player.y - canvas.height / 2 - camera.y) * 0.1;
-            
-            // Ограничение камеры
             camera.x = Math.max(0, Math.min(camera.x, WORLD_WIDTH - canvas.width));
             camera.y = Math.max(0, Math.min(camera.y, WORLD_HEIGHT - canvas.height));
 
-            // Поедание статичной еды
+            // ЕДА
             for (let i = foods.length - 1; i >= 0; i--) {
                 const food = foods[i];
-                const distToFood = Math.hypot(player.x - food.x, player.y - food.y);
-                if (distToFood < player.stage.size + food.size) {
+                const dist = Math.hypot(player.x - food.x, player.y - food.y);
+                if (dist < player.stage.size + food.size) {
                     if (player.stage.eats.includes(food.type)) {
-                        player.xp += food.xp;
-                        player.score += food.xp;
-                        foods.splice(i, 1);
-                        checkEvolution();
+                        player.xp += food.xp; player.score += food.xp;
+                        foods.splice(i, 1); checkEvolution();
                     }
                 }
             }
 
-            // Логика Ботов
-            for (let i = bots.length - 1; i >= 0; i--) {
-                let bot = bots[i];
-                bot.x += bot.vx;
-                bot.y += bot.vy;
-
-                // Отскок от стен
-                if (bot.x < 0 || bot.x > WORLD_WIDTH) bot.vx *= -1;
-                if (bot.y < 0 || bot.y > GROUND_Y) bot.vy *= -1;
-
-                // Взаимодействие игрока с ботами
-                const distToBot = Math.hypot(player.x - bot.x, player.y - bot.y);
-                if (distToBot < player.stage.size + bot.stage.size) {
-                    // Можем ли МЫ съесть бота?
-                    if (player.stage.eats.includes(bot.type)) {
-                        player.xp += bot.stage.reqXp; // Даем много опыта за убийство
-                        player.score += bot.stage.reqXp;
-                        bots.splice(i, 1);
-                        checkEvolution();
-                    } 
-                    // Может ли БОТ съесть нас?
-                    else if (bot.stage.eats.includes(player.stage.name.toLowerCase() === 'муха' ? 'fly' : 'bird')) {
-                        gameOver(); // Нас съели!
-                    }
-                }
-            }
-
-            // Спавн новых объектов, если мало
-            if (Math.random() < 0.05) spawnFood();
-            if (Math.random() < 0.01) spawnBot();
+            if (Math.random() < 0.05) spawnFood(); // Спавн новой еды
         }
 
-        // --- 6. ОТРИСОВКА ---
+        // --- 7. ОТРИСОВКА ---
         function draw() {
-            // Очистка и фон неба
-            ctx.fillStyle = '#87CEEB';
+            // Градиентный фон (Космос -> Небо -> Горизонт)
+            let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            // Считаем высоту камеры, чтобы менять фон
+            if (camera.y < SPACE_Y) {
+                // Мы в космосе
+                bgGrad.addColorStop(0, '#000000');
+                bgGrad.addColorStop(1, '#0f172a');
+            } else {
+                // Мы в небе
+                bgGrad.addColorStop(0, '#1e3a8a');
+                bgGrad.addColorStop(1, '#87CEEB');
+            }
+            ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Звезды (Рисуем только если камера высоко)
+            if (camera.y < SPACE_Y + 500) {
+                ctx.fillStyle = 'white';
+                for(let i=0; i<50; i++) {
+                    // Фейковые звезды для атмосферы
+                    let sx = (i * 87) % canvas.width;
+                    let sy = (i * 43) % canvas.height;
+                    ctx.fillRect(sx, sy, 2, 2);
+                }
+            }
 
             ctx.save();
             ctx.translate(-camera.x, -camera.y);
 
-            // Отрисовка Земли (Травы и почвы)
-            ctx.fillStyle = '#4ade80'; // Трава
+            // ЗЕМЛЯ
+            ctx.fillStyle = '#166534'; // Темная трава
             ctx.fillRect(0, GROUND_Y, WORLD_WIDTH, WORLD_HEIGHT - GROUND_Y);
-            ctx.fillStyle = '#854d0e'; // Земля под травой
-            ctx.fillRect(0, GROUND_Y + 20, WORLD_WIDTH, WORLD_HEIGHT - GROUND_Y - 20);
 
-            // Отрисовка Еды
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+            // ОТРИСОВКА ЕДЫ
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             foods.forEach(food => {
                 ctx.font = `${food.size * 2}px Arial`;
                 ctx.fillText(food.emoji, food.x, food.y);
                 
-                // Подсветка зеленым, если можем съесть
+                // Подсветка съедобного
                 if (player.stage.eats.includes(food.type)) {
-                    ctx.strokeStyle = '#22c55e';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(food.x, food.y, food.size * 1.5, 0, Math.PI * 2);
-                    ctx.stroke();
+                    ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.arc(food.x, food.y, food.size * 1.5, 0, Math.PI * 2); ctx.stroke();
                 }
             });
 
-            // Отрисовка Ботов
-            bots.forEach(bot => {
-                ctx.save();
-                ctx.translate(bot.x, bot.y);
-                if (bot.vx < 0) ctx.scale(-1, 1); // Поворот в сторону движения
-                ctx.font = `${bot.stage.size * 2}px Arial`;
-                ctx.fillText(bot.stage.emoji, 0, 0);
-                ctx.restore();
-
-                // Подсветка (Зеленым - еда, Красным - хищник)
-                let isFood = player.stage.eats.includes(bot.type);
-                let isPredator = bot.stage.eats.includes(player.stage.name.toLowerCase() === 'муха' ? 'fly' : 'bird'); // Упрощенная проверка
-                
-                if (isFood || isPredator) {
-                    ctx.strokeStyle = isFood ? '#22c55e' : '#ef4444';
-                    ctx.lineWidth = 4;
-                    ctx.beginPath();
-                    ctx.arc(bot.x, bot.y, bot.stage.size * 1.2, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-            });
-
-            // Отрисовка Игрока
+            // ИГРОК
             ctx.save();
             ctx.translate(player.x, player.y);
-            // Поворот по направлению мыши
-            if (player.direction === -1) ctx.scale(-1, 1); 
-            // Небольшой наклон при падении/полете
-            ctx.rotate(player.vy * 0.02 * player.direction); 
+            ctx.scale(player.direction, 1); // Поворот
+            
+            // Наклон при падении/взлете
+            ctx.rotate(player.vy * 0.03); 
             
             ctx.font = `${player.stage.size * 2}px Arial`;
             ctx.fillText(player.stage.emoji, 0, 0);
             
+            ctx.restore(); // Возвращаем координаты для текста имени
+
             // Имя над игроком
-            ctx.scale(player.direction, 1); // Возвращаем скейл для текста
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 16px Nunito';
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = 'black';
-            ctx.strokeText(player.stage.name, 0, -player.stage.size - 10);
-            ctx.fillText(player.stage.name, 0, -player.stage.size - 10);
-            ctx.restore();
+            ctx.fillStyle = 'white'; ctx.font = 'bold 16px Nunito';
+            ctx.lineWidth = 3; ctx.strokeStyle = 'black';
+            ctx.strokeText(player.stage.name, player.x, player.y - player.stage.size - 10);
+            ctx.fillText(player.stage.name, player.x, player.y - player.stage.size - 10);
 
             ctx.restore();
 
             if (gameActive) requestAnimationFrame(gameLoop);
         }
 
-        function gameLoop() {
-            update();
-            draw();
-        }
+        function gameLoop() { update(); draw(); }
 
-        // --- 7. ЗАПУСК ---
         document.getElementById('btn-play').onclick = () => {
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('hud').classList.remove('hidden');
             
             player.stage = EVOLUTION[0];
-            player.xp = 0;
-            player.score = 0;
-            player.x = WORLD_WIDTH / 2;
-            player.y = GROUND_Y - 100;
+            player.xp = 0; player.score = 0; player.oxygen = 100;
+            player.x = WORLD_WIDTH / 2; player.y = GROUND_Y - 50;
             player.vx = 0; player.vy = 0;
             
-            initWorld();
-            updateUI();
+            initWorld(); updateUI();
             
-            gameActive = true;
-            gameLoop();
+            gameActive = true; gameLoop();
         };
 
-        // Рисуем фон для меню с самого начала
-        draw(); 
+        draw(); // Рисуем фон сразу
     </script>
 </body>
 </html>
