@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EvoWorld - PRO EDITION 3.1</title>
+    <title>EvoWorld - PRO EDITION 3.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap');
@@ -18,7 +18,6 @@
         }
         canvas { display: block; }
 
-        /* Стили Меню */
         #menu { 
             background: rgba(15, 23, 42, 0.85); 
             backdrop-filter: blur(12px); 
@@ -34,7 +33,6 @@
             box-shadow: 0 0px 0 #7f1d1d; 
         }
 
-        /* Полосы интерфейса */
         .bar-container {
             width: 280px; 
             height: 24px; 
@@ -68,7 +66,6 @@
             letter-spacing: 1px;
         }
 
-        /* Иллюзия онлайна (Killfeed) */
         #killfeed {
             position: absolute;
             top: 80px;
@@ -99,7 +96,6 @@
 </head>
 <body>
 
-    <!-- ИНТЕРФЕЙС HUD -->
     <div id="hud" class="fixed top-0 left-0 w-full p-4 flex justify-between items-start z-10 hidden pointer-events-none">
         <div class="flex items-start gap-4">
             <div id="player-emoji" class="text-6xl drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] bg-slate-800/50 p-3 rounded-2xl border-2 border-slate-500/50 transition-transform duration-300">🦟</div>
@@ -130,7 +126,6 @@
 
     <div id="killfeed"></div>
 
-    <!-- ГЛАВНОЕ МЕНЮ -->
     <div id="menu" class="fixed inset-0 flex items-center justify-center z-50">
         <div class="bg-slate-900 p-10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.8)] text-center max-w-lg w-full border-4 border-slate-700 relative overflow-hidden">
             
@@ -138,18 +133,18 @@
             <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-red-500 rounded-full blur-[100px] opacity-30"></div>
 
             <h1 class="text-6xl font-black text-white mb-2 italic tracking-tighter relative z-10">
-                EVO<span class="text-red-500">PRO</span>
+                EVO<span class="text-red-500">PRO</span> <span class="text-2xl">3.2</span>
             </h1>
             <p id="death-reason" class="text-red-400 font-black mb-6 uppercase tracking-widest hidden bg-red-500/20 py-2 rounded-lg border border-red-500/30 relative z-10">Вы погибли!</p>
             
             <button id="btn-play" class="btn-play w-full text-white font-black text-3xl py-5 rounded-2xl uppercase tracking-widest mt-4 relative z-10">ИГРАТЬ</button>
             
             <div class="mt-8 text-left bg-slate-800 p-6 rounded-2xl border border-slate-600 text-slate-300 relative z-10 shadow-inner">
-                <h3 class="font-black text-white mb-3 text-lg border-b border-slate-600 pb-2">PRO-ФИЧИ (v3.1):</h3>
+                <h3 class="font-black text-white mb-3 text-lg border-b border-slate-600 pb-2">ПАТЧ 3.2 (ФИКСЫ):</h3>
                 <ul class="text-sm space-y-3 font-bold">
-                    <li class="flex items-center gap-2">🌊 <span class="text-blue-300">Океан добавлен! У воды другая физика.</span></li>
-                    <li class="flex items-center gap-2">🚨 <span class="text-red-300">Хищники теперь умные и гоняются за тобой.</span></li>
-                    <li class="flex items-center gap-2">✨ <span class="text-yellow-300">Новые частицы, эффекты и смена дня/ночи.</span></li>
+                    <li class="flex items-center gap-2">🌊 <span class="text-blue-300">Нормальный океан на дне, рыбы больше не летают!</span></li>
+                    <li class="flex items-center gap-2">💩 <span class="text-yellow-300">Очистка мусора (какашки исчезают, лагов нет).</span></li>
+                    <li class="flex items-center gap-2">💦 <span class="text-cyan-300">Морские течения и физика брызг при нырянии.</span></li>
                 </ul>
             </div>
         </div>
@@ -159,32 +154,36 @@
 
     <script>
         /** 
-         * EVO WORLD - PRO EDITION
-         * Движок написан с нуля для максимальной производительности и читаемости.
+         * EVO WORLD - PRO EDITION (PATCH 3.2)
+         * Архитектура переписана. Летающие акулы уничтожены.
          */
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
         // --- КОНСТАНТЫ МИРА ---
-        const WORLD_WIDTH = 8000;  // Огромный мир (4 биома по 2000px)
-        const WORLD_HEIGHT = 4000;
-        const GROUND_Y = 3800; 
+        const WORLD_WIDTH = 8000;  
+        const WORLD_HEIGHT = 4500; 
         const SPACE_Y = 1500;
+        
+        // Новая система уровней (Горизонтальная)
+        const LAND_Y = 3200;       // Уровень материков (Земля)
+        const WATER_LEVEL = 3500;  // Начало океана
+        const SEA_FLOOR = 4300;    // Дно океана
 
-        // Координаты Биомов
-        const BIOME_FOREST = { min: 0, max: 2000, color: '#166534' };
-        const BIOME_DESERT = { min: 2000, max: 4000, color: '#ca8a04' };
-        const BIOME_SNOW   = { min: 4000, max: 6000, color: '#e0f2fe' };
-        const BIOME_OCEAN  = { min: 6000, max: 8000, color: '#0369a1' }; // Вода
+        // Материки (Острова)
+        const PLATFORMS = [
+            { id: 'forest', min: 0,    max: 2600, y: LAND_Y, color: '#166534' },
+            { id: 'desert', min: 2700, max: 5300, y: LAND_Y, color: '#ca8a04' },
+            { id: 'snow',   min: 5400, max: 8000, y: LAND_Y, color: '#e0f2fe' }
+        ];
 
         // --- БАЗА ДАННЫХ ИГРЫ ---
-
         const EVOLUTION = [
             { id: 0, type: 'fly',      name: "Комар",    emoji: "🦟", size: 20, speed: 6, flap: -8, reqXp: 30, eats: ['poop'], isAquatic: false },
             { id: 1, type: 'butterfly',name: "Бабочка",  emoji: "🦋", size: 30, speed: 7, flap: -9, reqXp: 80, eats: ['flower', 'cactus', 'ice'], isAquatic: false },
             { id: 2, type: 'bird',     name: "Птичка",   emoji: "🐦", size: 40, speed: 9, flap: -10, reqXp: 200, eats: ['bug', 'crab'], isAquatic: false },
-            { id: 3, type: 'turtle',   name: "Черепаха", emoji: "🐢", size: 50, speed: 5, flap: -6, reqXp: 400, eats: ['kelp', 'fish'], isAquatic: true }, // Земноводное
+            { id: 3, type: 'turtle',   name: "Черепаха", emoji: "🐢", size: 50, speed: 5, flap: -6, reqXp: 400, eats: ['kelp', 'fish'], isAquatic: true },
             { id: 4, type: 'eagle',    name: "Сокол",    emoji: "🦅", size: 65, speed: 13, flap: -12, reqXp: 800, eats: ['mouse', 'penguin', 'turtle'], isAquatic: false },
             { id: 5, type: 'shark',    name: "Акула",    emoji: "🦈", size: 85, speed: 14, flap: -10, reqXp: 1500, eats: ['turtle', 'penguin', 'pig'], isAquatic: true },
             { id: 6, type: 'dragon',   name: "Дракон",   emoji: "🐉", size: 100, speed: 16, flap: -14, reqXp: 3000, eats: ['camel', 'shark', 'cloud'], isAquatic: false },
@@ -194,11 +193,11 @@
         ];
 
         const FOOD_TYPES = {
-            'poop':   { emoji: '💩', size: 15, xp: 5,   zones: ['forest', 'desert', 'snow'] },
+            'poop':   { emoji: '💩', size: 15, xp: 5,   isGround: true },
             'flower': { emoji: '🌺', size: 20, xp: 10,  zones: ['forest'] },
             'cactus': { emoji: '🌵', size: 25, xp: 15,  zones: ['desert'] },
             'ice':    { emoji: '🧊', size: 20, xp: 10,  zones: ['snow'] },
-            'kelp':   { emoji: '🌿', size: 25, xp: 15,  zones: ['ocean'] },
+            'kelp':   { emoji: '🌿', size: 25, xp: 15,  isSeaFloor: true },
             'cloud':  { emoji: '☁️', size: 70, xp: 100, floatSpeed: 1, isSky: true }, 
             'star':   { emoji: '⭐', size: 35, xp: 200, floatSpeed: 0.5, isSpace: true }, 
             'meteor': { emoji: '☄️', size: 55, xp: 500, floatSpeed: 3, isSpace: true },
@@ -206,25 +205,25 @@
         };
 
         const ANIMAL_TYPES = {
-            'bug':    { emoji: '🪲', size: 15, xp: 15, speed: 3, jump: -6, isFlying: true,  minY: GROUND_Y-500, zones: ['forest', 'desert'] },
-            'mouse':  { emoji: '🐁', size: 25, xp: 25, speed: 4, jump: -5, isFlying: false, minY: GROUND_Y,     zones: ['forest'] },
-            'pig':    { emoji: '🐖', size: 40, xp: 50, speed: 2, jump: -4, isFlying: false, minY: GROUND_Y,     zones: ['forest'] },
-            'camel':  { emoji: '🐪', size: 50, xp: 60, speed: 2, jump: -3, isFlying: false, minY: GROUND_Y,     zones: ['desert'] },
-            'penguin':{ emoji: '🐧', size: 35, xp: 40, speed: 3, jump: -5, isFlying: false, minY: GROUND_Y,     zones: ['snow'] },
-            'crab':   { emoji: '🦀', size: 20, xp: 20, speed: 2, jump: -3, isFlying: false, minY: GROUND_Y,     zones: ['ocean'] },
-            'fish':   { emoji: '🐟', size: 30, xp: 35, speed: 5, jump: -2, isFlying: true,  minY: GROUND_Y-300, zones: ['ocean'] }, // Плавает
-            'shark':  { emoji: '🦈', size: 70, xp: 150, speed: 8, jump: -3, isFlying: true,  minY: GROUND_Y-500, zones: ['ocean'], eats: ['turtle', 'fish', 'penguin', 'pig'] }, // Хищник-бот
-            'eagle':  { emoji: '🦅', size: 60, xp: 120, speed: 9, jump: -8, isFlying: true,  minY: GROUND_Y-800, zones: ['forest', 'snow', 'desert'], eats: ['mouse', 'penguin', 'turtle'] } // Хищник-бот
+            'bug':    { emoji: '🪲', size: 15, xp: 15, speed: 3, jump: -6, isFlying: true,  zones: ['forest', 'desert'] },
+            'mouse':  { emoji: '🐁', size: 25, xp: 25, speed: 4, jump: -5, isFlying: false, zones: ['forest'] },
+            'pig':    { emoji: '🐖', size: 40, xp: 50, speed: 2, jump: -4, isFlying: false, zones: ['forest'] },
+            'camel':  { emoji: '🐪', size: 60, xp: 60, speed: 2, jump: -3, isFlying: false, zones: ['desert'] },
+            'penguin':{ emoji: '🐧', size: 35, xp: 40, speed: 3, jump: -5, isFlying: false, zones: ['snow'] },
+            // ВОДНЫЕ МОБЫ (Жестко привязаны к океану)
+            'crab':   { emoji: '🦀', size: 20, xp: 20, speed: 2, jump: 0,  isFlying: false, isWaterMob: true, isBottomCrawler: true },
+            'fish':   { emoji: '🐟', size: 30, xp: 35, speed: 5, jump: 0,  isFlying: true,  isWaterMob: true }, 
+            'shark':  { emoji: '🦈', size: 70, xp: 150, speed: 8, jump: 0,  isFlying: true,  isWaterMob: true, eats: ['turtle', 'fish', 'penguin', 'pig'] },
+            'eagle':  { emoji: '🦅', size: 60, xp: 120, speed: 9, jump: -8, isFlying: true,  zones: ['forest', 'snow', 'desert'], eats: ['mouse', 'penguin', 'turtle'] }
         };
 
-        // --- СОСТОЯНИЕ ИГРЫ ---
         let gameActive = false;
         let mouseX = 0, mouseY = 0;
         let camera = { x: 0, y: 0 };
-        let timeOfDay = 0; // 0 - 24000 (Для смены дня и ночи)
+        let timeOfDay = 0;
         
         let player = {
-            x: 1000, y: GROUND_Y - 100,
+            x: 1000, y: LAND_Y - 100,
             vx: 0, vy: 0, 
             stage: EVOLUTION[0],
             xp: 0, score: 0, 
@@ -239,20 +238,18 @@
 
         // --- СИСТЕМА ЧАСТИЦ (VFX) ---
         class Particle {
-            constructor(x, y, color) {
-                this.x = x;
-                this.y = y;
+            constructor(x, y, color, customVy = 0) {
+                this.x = x; this.y = y;
                 this.vx = (Math.random() - 0.5) * 10;
-                this.vy = (Math.random() - 0.5) * 10;
+                this.vy = customVy || (Math.random() - 0.5) * 10;
                 this.size = Math.random() * 6 + 2;
                 this.color = color;
                 this.life = 1.0;
                 this.decay = Math.random() * 0.02 + 0.02;
             }
             update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vy += 0.2; // Гравитация частиц
+                this.x += this.vx; this.y += this.vy;
+                this.vy += 0.2; 
                 this.life -= this.decay;
             }
             draw(ctx) {
@@ -263,38 +260,43 @@
             }
         }
 
-        function createExplosion(x, y, color, count = 15) {
+        function createExplosion(x, y, color, count = 15, isSplash = false) {
             for(let i = 0; i < count; i++) {
-                particles.push(new Particle(x, y, color));
+                particles.push(new Particle(x, y, color, isSplash ? -Math.random()*15 : 0));
             }
         }
 
         // --- ГЕНЕРАЦИЯ МИРА ---
-        
-        function getZoneX(zones) {
-            if (!zones || zones.length === 0) return Math.random() * WORLD_WIDTH;
-            const zone = zones[Math.floor(Math.random() * zones.length)];
-            if (zone === 'forest') return Math.random() * 2000;
-            if (zone === 'desert') return 2000 + Math.random() * 2000;
-            if (zone === 'snow')   return 4000 + Math.random() * 2000;
-            if (zone === 'ocean')  return 6000 + Math.random() * 2000;
-            return Math.random() * WORLD_WIDTH;
+        function getZonePlatform(zones) {
+            if(!zones) return PLATFORMS[Math.floor(Math.random() * PLATFORMS.length)];
+            const zId = zones[Math.floor(Math.random() * zones.length)];
+            return PLATFORMS.find(p => p.id === zId) || PLATFORMS[0];
         }
 
         function spawnFood(type, forcedX = null, forcedY = null, isVIP = false) {
-            if (!isVIP && foods.length > 300) return;
+            if (!isVIP && foods.length > 200) return;
             let data = FOOD_TYPES[type];
+            let xPos = forcedX, yPos = forcedY;
             
-            let xPos = forcedX || getZoneX(data.zones);
-            let yPos = forcedY;
+            if (!xPos) {
+                if(data.isSpace || data.isSky || data.isSeaFloor) xPos = Math.random() * WORLD_WIDTH;
+                else {
+                    let p = getZonePlatform(data.zones);
+                    xPos = p.min + Math.random() * (p.max - p.min);
+                }
+            }
             
             if (!yPos) {
-                if (data.isSky) yPos = SPACE_Y + Math.random() * 1500;
+                if (data.isSky) yPos = SPACE_Y + Math.random() * 1000;
                 else if (data.isSpace) yPos = Math.random() * SPACE_Y;
-                else yPos = GROUND_Y - Math.random() * 50;
+                else if (data.isSeaFloor) yPos = SEA_FLOOR - 10;
+                else {
+                    let p = PLATFORMS.find(pl => xPos >= pl.min && xPos <= pl.max);
+                    yPos = p ? p.y - 10 : LAND_Y - 10;
+                }
             }
 
-            foods.push({ x: xPos, y: yPos, type: type, ...data });
+            foods.push({ x: xPos, y: yPos, type: type, createdAt: Date.now(), ...data });
         }
 
         function spawnAnimal(specificType = null) {
@@ -303,15 +305,21 @@
             const type = specificType || types[Math.floor(Math.random() * types.length)];
             const data = ANIMAL_TYPES[type];
             
-            let xPos = getZoneX(data.zones);
-            let yPos = data.isFlying ? data.minY + Math.random() * 300 : GROUND_Y - Math.random() * 50;
+            let xPos, yPos;
+
+            if (data.isWaterMob) {
+                xPos = Math.random() * WORLD_WIDTH;
+                yPos = data.isBottomCrawler ? SEA_FLOOR : WATER_LEVEL + 50 + Math.random() * (SEA_FLOOR - WATER_LEVEL - 100);
+            } else {
+                let p = getZonePlatform(data.zones);
+                xPos = p.min + 50 + Math.random() * (p.max - p.min - 100);
+                yPos = data.isFlying ? p.y - 100 - Math.random() * 300 : p.y;
+            }
 
             animals.push({
-                id: Math.random(), // Уникальный ID
-                x: xPos,
-                y: yPos,
-                vx: (Math.random() - 0.5) * data.speed,
-                vy: 0, 
+                id: Math.random(),
+                x: xPos, y: yPos,
+                vx: (Math.random() - 0.5) * data.speed, vy: 0, 
                 type: type, 
                 ...data,
                 direction: Math.random() > 0.5 ? 1 : -1,
@@ -321,7 +329,7 @@
 
         function initWorld() {
             foods = []; animals = []; particles = [];
-            timeOfDay = 8000; // Начинаем с утра
+            timeOfDay = 8000; 
             
             for(let i=0; i<50; i++) { spawnFood('flower'); spawnFood('cactus'); spawnFood('ice'); spawnFood('kelp'); }
             for(let i=0; i<40; i++) spawnFood('cloud');
@@ -329,20 +337,14 @@
             for(let i=0; i<80; i++) spawnAnimal();
         }
 
-        // --- УПРАВЛЕНИЕ И ИВЕНТЫ ---
-        
-        window.addEventListener('resize', () => { 
-            canvas.width = window.innerWidth; 
-            canvas.height = window.innerHeight; 
-        });
+        // --- УПРАВЛЕНИЕ ---
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
         window.dispatchEvent(new Event('resize'));
-        
         canvas.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
         canvas.addEventListener('touchmove', (e) => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; });
         
         function flap() {
             if (!gameActive) return;
-            // Если в воде, прыжок слабее, но можно плыть в любую сторону
             if (player.inWater) {
                 let targetWorldY = mouseY + camera.y;
                 let dy = targetWorldY - player.y;
@@ -350,12 +352,11 @@
             } else {
                 player.vy = player.stage.flap; 
             }
-            createExplosion(player.x, player.y + player.stage.size, '#ffffff', 3); // Пыль от взмаха
+            createExplosion(player.x, player.y + player.stage.size, player.inWater ? '#38bdf8' : '#ffffff', 3);
         }
         canvas.addEventListener('mousedown', flap);
         canvas.addEventListener('touchstart', flap);
 
-        // Иллюзия онлайна
         function addKillFeed(killer, victim) {
             const feed = document.getElementById('killfeed');
             const msg = document.createElement('div');
@@ -365,7 +366,6 @@
             setTimeout(() => msg.remove(), 4000);
         }
 
-        // Симуляция чужих убийств
         setInterval(() => {
             if(!gameActive) return;
             if(Math.random() < 0.3) {
@@ -375,18 +375,14 @@
             }
         }, 8000);
 
-        // --- ОСНОВНАЯ ЛОГИКА ---
-
+        // --- ЛОГИКА ---
         function checkEvolution() {
             if (player.xp >= player.stage.reqXp) {
                 const nextStage = EVOLUTION[player.stage.id + 1];
                 if (nextStage) {
                     player.xp -= player.stage.reqXp; 
                     player.stage = nextStage;
-                    
-                    // Мега-взрыв при эволюции
                     createExplosion(player.x, player.y, '#facc15', 50);
-                    
                     const emoji = document.getElementById('player-emoji');
                     emoji.classList.add('scale-150', 'rotate-12');
                     setTimeout(() => emoji.classList.remove('scale-150', 'rotate-12'), 400);
@@ -399,363 +395,281 @@
             document.getElementById('player-emoji').textContent = player.stage.emoji;
             document.getElementById('player-name-display').textContent = player.stage.name;
             document.getElementById('score').textContent = player.score;
-            
             const req = player.stage.reqXp;
             document.getElementById('xp-fill').style.width = req === 99999 ? '100%' : `${(player.xp / req) * 100}%`;
             document.getElementById('xp-text').textContent = req === 99999 ? "MAX LEVEL" : `${player.xp} / ${req} XP`;
 
-            // Обновляем список еды
-            const eatIcons = player.stage.eats.map(f => {
-                if (FOOD_TYPES[f]) return FOOD_TYPES[f].emoji;
-                if (ANIMAL_TYPES[f]) return ANIMAL_TYPES[f].emoji;
-                const evo = EVOLUTION.find(e => e.type === f);
-                return evo ? evo.emoji : '🥩';
-            });
+            const eatIcons = player.stage.eats.map(f => FOOD_TYPES[f]?.emoji || ANIMAL_TYPES[f]?.emoji || EVOLUTION.find(e=>e.type===f)?.emoji || '🥩');
             document.getElementById('eats-info').textContent = "ЕСТ: " + eatIcons.join(' ');
         }
 
         function die(reason) {
             gameActive = false;
-            createExplosion(player.x, player.y, '#ef4444', 100); // Взрыв крови
-            
+            createExplosion(player.x, player.y, '#ef4444', 100); 
             setTimeout(() => {
                 document.getElementById('hud').classList.add('hidden');
                 document.getElementById('menu').classList.remove('hidden');
                 document.getElementById('death-reason').textContent = reason;
                 document.getElementById('death-reason').classList.remove('hidden');
-            }, 1000); // Даем время посмотреть на смерть
+            }, 1000);
         }
 
         function update() {
             if (!gameActive) return;
 
-            // Время суток
-            timeOfDay += 2;
-            if(timeOfDay > 24000) timeOfDay = 0;
+            timeOfDay += 2; if(timeOfDay > 24000) timeOfDay = 0;
+            const OCEAN_CURRENT = Math.sin(Date.now() / 2000) * 1.5; // Течение
 
-            // Проверка Биома (Океан)
-            player.inWater = player.x >= BIOME_OCEAN.min && player.y > GROUND_Y - 800; // Вода глубокая
+            // Проверка воды и всплеск
+            let wasInWater = player.inWater;
+            player.inWater = player.y > WATER_LEVEL;
+            
+            if (!wasInWater && player.inWater) {
+                createExplosion(player.x, WATER_LEVEL, '#e0f2fe', 30, true); // Брызги
+                player.vy *= 0.2; // Удар о воду
+            }
 
-            // --- ДВИЖЕНИЕ ИГРОКА ---
+            // Движение игрока
             let targetWorldX = mouseX + camera.x;
             let dx = targetWorldX - player.x;
-            
             if (Math.abs(dx) > 10) {
                 player.direction = dx > 0 ? 1 : -1;
                 let targetVx = player.direction * player.stage.speed;
-                // В воде двигаемся медленнее
-                player.vx += ((player.inWater ? targetVx * 0.6 : targetVx) - player.vx) * 0.1; 
-            } else { 
-                player.vx *= 0.9; 
-            }
+                player.vx += ((player.inWater ? targetVx * 0.5 : targetVx) - player.vx) * 0.1; 
+            } else { player.vx *= 0.9; }
 
-            // Гравитация
             if (player.inWater) {
-                player.vy += 0.1; // Архимедова сила (почти не тонем)
-                player.vy *= 0.9; // Сильное сопротивление воды
+                player.vy += 0.1; 
+                player.vy *= 0.9; 
+                player.x += OCEAN_CURRENT; // Сносит течением
             } else {
-                player.vy += 0.4; // Обычная гравитация
-                player.vy *= 0.96; // Воздух
+                player.vy += 0.4; 
+                player.vy *= 0.96; 
             }
             
             player.x += player.vx; 
             player.y += player.vy;
 
-            // Ограничения карты
+            // Коллизии игрока с картой
             if (player.x < 0) { player.x = 0; player.vx = 0; }
             if (player.x > WORLD_WIDTH) { player.x = WORLD_WIDTH; player.vx = 0; }
             if (player.y < 0) { player.y = 0; player.vy = 0; } 
-            if (player.y > GROUND_Y && !player.inWater) { player.y = GROUND_Y; player.vy = 0; }
-            if (player.y > GROUND_Y && player.inWater) { player.y = GROUND_Y; player.vy = 0; } // Дно океана
+            
+            // Коллизия с материками (если падаем сверху)
+            if (!player.inWater && player.vy > 0) {
+                for (let p of PLATFORMS) {
+                    if (player.x >= p.min && player.x <= p.max && player.y >= p.y && player.y - player.vy <= p.y + 20) {
+                        player.y = p.y; player.vy = 0; break;
+                    }
+                }
+            }
+            if (player.y > SEA_FLOOR) { player.y = SEA_FLOOR; player.vy = 0; } // Дно
 
-            // --- СИСТЕМА КИСЛОРОДА ---
+            // Кислород
             let isSuffocating = false;
             let deathMsg = "";
-
-            if (player.y < SPACE_Y && player.stage.id < 7) {
-                // Космос, а мы не пришелец
-                isSuffocating = true;
-                deathMsg = "Задохнулся в вакууме! 🥶";
-            } 
-            else if (player.inWater && !player.stage.isAquatic) {
-                // Под водой, а мы не рыба/черепаха
-                isSuffocating = true;
-                deathMsg = "Утонул в океане! 🫧";
-            }
-            else if (!player.inWater && player.stage.isAquatic && player.stage.type !== 'turtle') {
-                // Мы акула/рыба и вылезли на сушу (Черепахе можно)
-                isSuffocating = true;
-                deathMsg = "Высох на суше! ☀️";
-            }
+            if (player.y < SPACE_Y && player.stage.id < 7) { isSuffocating = true; deathMsg = "Задохнулся в вакууме! 🥶"; } 
+            else if (player.inWater && !player.stage.isAquatic) { isSuffocating = true; deathMsg = "Утонул в океане! 🫧"; }
+            else if (!player.inWater && player.stage.isAquatic && player.stage.type !== 'turtle') { isSuffocating = true; deathMsg = "Высох на суше! ☀️"; }
 
             if (isSuffocating) {
-                player.oxygen -= 0.3; 
+                let depthPenalty = player.inWater ? ((player.y - WATER_LEVEL) / 500) : 0;
+                player.oxygen -= (0.3 + depthPenalty); // На глубине кислород тратится быстрее!
                 if (player.oxygen <= 0) die(deathMsg);
-            } else { 
-                player.oxygen = Math.min(100, player.oxygen + 1); 
-            }
+            } else { player.oxygen = Math.min(100, player.oxygen + 1); }
 
-            // Отрисовка полосы O2
-            const o2Fill = document.getElementById('o2-fill');
-            o2Fill.style.width = `${player.oxygen}%`;
-            o2Fill.style.background = player.oxygen < 30 ? '#ef4444' : '';
+            document.getElementById('o2-fill').style.width = `${Math.max(0, player.oxygen)}%`;
+            document.getElementById('o2-fill').style.background = player.oxygen < 30 ? '#ef4444' : '';
 
-            // --- КАМЕРА ---
             camera.x += (player.x - canvas.width / 2 - camera.x) * 0.1;
             camera.y += (player.y - canvas.height / 2 - camera.y) * 0.1;
             camera.x = Math.max(0, Math.min(camera.x, WORLD_WIDTH - canvas.width));
             camera.y = Math.max(0, Math.min(camera.y, WORLD_HEIGHT - canvas.height));
 
-            // --- ИСКУССТВЕННЫЙ ИНТЕЛЛЕКТ ЖИВОТНЫХ (PRO AI) ---
+            // ИИ ЖИВОТНЫХ
             for (let i = animals.length - 1; i >= 0; i--) {
                 let anim = animals[i];
-                let isAnimInWater = anim.x >= BIOME_OCEAN.min;
-
-                // Базовая физика животных
-                if (!anim.isFlying && !isAnimInWater) anim.vy += 0.4; // Гравитация
-                if (isAnimInWater) anim.vy *= 0.9; // Вода тормозит
                 
-                anim.x += anim.vx; 
-                anim.y += anim.vy;
-
-                // Коллизия с землей
-                if (anim.y > anim.minY && !isAnimInWater) {
-                    anim.y = anim.minY; 
-                    anim.vy = 0;
-                    if (Math.random() < 0.02) anim.vy = anim.jump; 
+                if (anim.isWaterMob) {
+                    anim.x += anim.vx + OCEAN_CURRENT;
+                    anim.y += anim.vy;
+                    if (anim.isBottomCrawler) {
+                        anim.y = SEA_FLOOR; anim.vy = 0;
+                    } else {
+                        if (anim.y < WATER_LEVEL + 50) { anim.y = WATER_LEVEL + 50; anim.vy *= -1; }
+                        if (anim.y > SEA_FLOOR - 50) { anim.y = SEA_FLOOR - 50; anim.vy *= -1; }
+                    }
+                } else {
+                    if (!anim.isFlying) anim.vy += 0.4; 
+                    anim.x += anim.vx; anim.y += anim.vy;
+                    
+                    let p = PLATFORMS.find(pl => anim.x >= pl.min && anim.x <= pl.max);
+                    let ground = p ? p.y : SEA_FLOOR;
+                    
+                    if (anim.y > ground && !anim.isFlying) {
+                        anim.y = ground; anim.vy = 0;
+                        if (Math.random() < 0.02) anim.vy = anim.jump; 
+                    }
+                    if (!anim.isFlying && p) {
+                        if (anim.x < p.min + 20) { anim.x = p.min + 20; anim.vx *= -1; }
+                        if (anim.x > p.max - 20) { anim.x = p.max - 20; anim.vx *= -1; }
+                    }
                 }
 
                 anim.actionTimer--;
-
-                // ИИ ХИЩНИКА: Поиск Игрока
                 let isHunting = false;
                 const distToPlayer = Math.hypot(player.x - anim.x, player.y - anim.y);
                 
                 if (anim.eats && anim.eats.includes(player.stage.type) && distToPlayer < 600) {
-                    // Бот видит игрока и хочет его съесть!
                     isHunting = true;
                     anim.direction = player.x > anim.x ? 1 : -1;
-                    anim.vx = anim.direction * anim.speed * 1.2; // Ускорение при охоте
+                    anim.vx = anim.direction * anim.speed * 1.2; 
+                    if (anim.isFlying || anim.isWaterMob) anim.vy = (player.y - anim.y) * 0.05; 
                     
-                    if (anim.isFlying || isAnimInWater) {
-                        anim.vy = (player.y - anim.y) * 0.05; // Летит/плывет вверх-вниз к игроку
-                    }
-                    
-                    // Бот убивает игрока
                     if (distToPlayer < player.stage.size + anim.size * 0.5) {
                         addKillFeed(anim.emoji + " " + anim.name, player.stage.name);
-                        die(`Вас сожрал ${anim.name}! 💀`);
-                        return; // Конец игры
+                        die(`Вас сожрал ${anim.name}! 💀`); return; 
                     }
                 }
 
-                // ИИ ОБЫЧНОГО ПОВЕДЕНИЯ (Блуждание)
                 if (!isHunting && anim.actionTimer <= 0) {
                     anim.actionTimer = 60 + Math.random() * 100;
                     anim.direction = Math.random() > 0.5 ? 1 : -1;
                     anim.vx = anim.direction * anim.speed;
-                    if (anim.isFlying || isAnimInWater) {
-                        anim.vy = (Math.random() - 0.5) * anim.speed; // Меняет высоту
-                    }
+                    if (anim.isFlying || (anim.isWaterMob && !anim.isBottomCrawler)) anim.vy = (Math.random() - 0.5) * anim.speed; 
                 }
                 
-                // Ограничение зоны обитания
-                let minX = 0, maxX = WORLD_WIDTH;
-                if(anim.zones) {
-                    if (!anim.zones.includes('desert') && anim.x > BIOME_DESERT.min && anim.x < BIOME_DESERT.max) anim.vx *= -1;
-                    if (!anim.zones.includes('ocean') && anim.x > BIOME_OCEAN.min) { anim.vx *= -1; anim.x = BIOME_OCEAN.min - 10; }
-                }
                 if (anim.x < 0 || anim.x > WORLD_WIDTH) anim.vx *= -1;
-                if ((anim.isFlying || isAnimInWater) && anim.y < anim.minY) anim.vy *= -1; // Не улетает в космос
+                if (anim.isFlying && anim.y < 1500) anim.vy *= -1; 
 
-                // 💩 VIP СПАВН (Генерация еды)
+                // VIP СПАВН ЕДЫ
                 if ((anim.type === 'pig' || anim.type === 'mouse' || anim.type === 'camel') && Math.random() < 0.003) {
                     spawnFood('poop', anim.x, anim.y, true);
                 }
 
-                // Игрок ест Животное
                 if (distToPlayer < player.stage.size + anim.size && player.stage.eats.includes(anim.type)) {
-                    player.xp += anim.xp; 
-                    player.score += anim.xp;
-                    createExplosion(anim.x, anim.y, '#ef4444', 20); // Кровь
-                    animals.splice(i, 1); 
-                    checkEvolution();
+                    player.xp += anim.xp; player.score += anim.xp;
+                    createExplosion(anim.x, anim.y, '#ef4444', 20); 
+                    animals.splice(i, 1); checkEvolution();
                 }
             }
 
-            // --- ЛОГИКА ЕДЫ ---
+            // ЛОГИКА ЕДЫ И СБОРЩИК МУСОРА
+            const now = Date.now();
             for (let i = foods.length - 1; i >= 0; i--) {
                 const food = foods[i];
+                
+                // GC: Удаляем старые какашки через 15 сек (чтобы не лагало)
+                if (food.type === 'poop' && now - food.createdAt > 15000) {
+                    foods.splice(i, 1); continue;
+                }
+
                 if (food.floatSpeed) food.x -= food.floatSpeed; 
                 if (food.x < -200) food.x = WORLD_WIDTH + 200; 
 
                 const dist = Math.hypot(player.x - food.x, player.y - food.y);
                 if (dist < player.stage.size + food.size && player.stage.eats.includes(food.type)) {
-                    player.xp += food.xp; 
-                    player.score += food.xp;
-                    createExplosion(food.x, food.y, '#22c55e', 10); // Зеленые искры
-                    foods.splice(i, 1); 
-                    checkEvolution();
+                    player.xp += food.xp; player.score += food.xp;
+                    createExplosion(food.x, food.y, '#22c55e', 10); 
+                    foods.splice(i, 1); checkEvolution();
                 }
             }
 
-            // Восполнение мира
             if (animals.length < 80 && Math.random() < 0.03) spawnAnimal();
-            
-            // Обновление частиц
-            particles.forEach((p, i) => {
-                p.update();
-                if(p.life <= 0) particles.splice(i, 1);
-            });
+            particles.forEach((p, i) => { p.update(); if(p.life <= 0) particles.splice(i, 1); });
         }
 
-        // --- ОТРИСОВКА (РЕНДЕР) ---
-
         function draw() {
-            // 1. Отрисовка Неба и Космоса с учетом Времени Суток
             let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            
-            // Вычисляем темноту (0 - день, 1 - ночь)
             let darkness = 0;
-            if (timeOfDay > 12000 && timeOfDay < 20000) darkness = (timeOfDay - 12000) / 4000; // Закат
-            if (timeOfDay >= 20000 || timeOfDay < 4000) darkness = 1; // Ночь
-            if (timeOfDay >= 4000 && timeOfDay <= 8000) darkness = 1 - ((timeOfDay - 4000) / 4000); // Рассвет
-            if (darkness > 1) darkness = 1;
+            if (timeOfDay > 12000 && timeOfDay < 20000) darkness = (timeOfDay - 12000) / 4000; 
+            if (timeOfDay >= 20000 || timeOfDay < 4000) darkness = 1; 
+            if (timeOfDay >= 4000 && timeOfDay <= 8000) darkness = 1 - ((timeOfDay - 4000) / 4000); 
 
             if (camera.y < SPACE_Y) { 
-                // Космос всегда черный
-                skyGradient.addColorStop(0, '#000000'); 
-                skyGradient.addColorStop(1, '#0f172a'); 
+                skyGradient.addColorStop(0, '#000000'); skyGradient.addColorStop(1, '#0f172a'); 
             } else { 
-                // Небо меняет цвет
                 let r1 = Math.floor(30 * (1-darkness)); let g1 = Math.floor(58 * (1-darkness)); let b1 = Math.floor(138 * (1-darkness));
                 let r2 = Math.floor(135 * (1-darkness)); let g2 = Math.floor(206 * (1-darkness)); let b2 = Math.floor(235 * (1-darkness));
-                skyGradient.addColorStop(0, `rgb(${r1},${g1},${b1})`); 
-                skyGradient.addColorStop(1, `rgb(${r2},${g2},${b2})`); 
+                skyGradient.addColorStop(0, `rgb(${r1},${g1},${b1})`); skyGradient.addColorStop(1, `rgb(${r2},${g2},${b2})`); 
             }
-            
-            ctx.fillStyle = skyGradient; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = skyGradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Звезды (в космосе или ночью)
             if (camera.y < SPACE_Y + 500 || darkness > 0.5) {
                 ctx.fillStyle = `rgba(255, 255, 255, ${camera.y < SPACE_Y ? 1 : darkness})`;
-                for(let i=0; i<100; i++) { 
-                    ctx.fillRect((i * 137) % canvas.width, (i * 93) % canvas.height, 2, 2); 
-                }
+                for(let i=0; i<100; i++) { ctx.fillRect((i * 137) % canvas.width, (i * 93) % canvas.height, 2, 2); }
             }
 
-            ctx.save(); 
-            ctx.translate(-camera.x, -camera.y);
+            ctx.save(); ctx.translate(-camera.x, -camera.y);
 
-            // 2. ОТРИСОВКА БИОМОВ (Земля и Вода)
-            ctx.fillStyle = BIOME_FOREST.color; ctx.fillRect(BIOME_FOREST.min, GROUND_Y, 2000, WORLD_HEIGHT - GROUND_Y);
-            ctx.fillStyle = BIOME_DESERT.color; ctx.fillRect(BIOME_DESERT.min, GROUND_Y, 2000, WORLD_HEIGHT - GROUND_Y);
-            ctx.fillStyle = BIOME_SNOW.color;   ctx.fillRect(BIOME_SNOW.min, GROUND_Y, 2000, WORLD_HEIGHT - GROUND_Y);
+            // МАТЕРИКИ
+            PLATFORMS.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.min, p.y, p.max - p.min, WATER_LEVEL - p.y + 50); // Толщина острова
+            });
             
-            // ОКЕАН (Прозрачная вода)
+            // ОКЕАН (Один глобальный слой)
             ctx.fillStyle = 'rgba(3, 105, 161, 0.7)'; 
-            ctx.fillRect(BIOME_OCEAN.min, GROUND_Y - 800, 2000, WORLD_HEIGHT - (GROUND_Y - 800));
-            // Дно океана
-            ctx.fillStyle = '#b45309'; // Песок на дне
-            ctx.fillRect(BIOME_OCEAN.min, GROUND_Y, 2000, WORLD_HEIGHT - GROUND_Y);
+            ctx.fillRect(0, WATER_LEVEL, WORLD_WIDTH, SEA_FLOOR - WATER_LEVEL);
+            
+            // МОРСКОЕ ДНО
+            ctx.fillStyle = '#b45309'; 
+            ctx.fillRect(0, SEA_FLOOR, WORLD_WIDTH, WORLD_HEIGHT - SEA_FLOOR);
 
-            // 3. ОТРИСОВКА ЕДЫ
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             foods.forEach(food => {
-                ctx.font = `${food.size * 2}px Arial`; 
-                ctx.fillText(food.emoji, food.x, food.y);
-                
+                ctx.font = `${food.size * 2}px Arial`; ctx.fillText(food.emoji, food.x, food.y);
                 if (player.stage.eats.includes(food.type)) {
                     ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 3;
                     ctx.beginPath(); ctx.arc(food.x, food.y, food.size * 1.4, 0, Math.PI * 2); ctx.stroke();
                 }
             });
 
-            // 4. ОТРИСОВКА ЖИВОТНЫХ (Ботов)
             animals.forEach(anim => {
-                ctx.save(); 
-                ctx.translate(anim.x, anim.y);
-                ctx.scale(anim.direction, 1); 
-                
-                // Раскачивание при ходьбе
-                if(!anim.isFlying && anim.vy === 0 && anim.vx !== 0) {
-                    ctx.rotate(Math.sin(Date.now() / 100) * 0.1);
-                }
+                ctx.save(); ctx.translate(anim.x, anim.y); ctx.scale(anim.direction, 1); 
+                if(!anim.isFlying && anim.vy === 0 && anim.vx !== 0 && !anim.isBottomCrawler) ctx.rotate(Math.sin(Date.now() / 100) * 0.1);
+                ctx.font = `${anim.size * 2}px Arial`; ctx.fillText(anim.emoji, 0, 0); ctx.restore();
 
-                ctx.font = `${anim.size * 2}px Arial`; 
-                ctx.fillText(anim.emoji, 0, 0);
-                ctx.restore();
-
-                // Подсветка (Зеленая = еда, КРАСНАЯ = ХИЩНИК!)
                 if (player.stage.eats.includes(anim.type)) {
                     ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 4;
                     ctx.beginPath(); ctx.arc(anim.x, anim.y, anim.size * 1.3, 0, Math.PI * 2); ctx.stroke();
                 } else if (anim.eats && anim.eats.includes(player.stage.type)) {
-                    ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 5; // Хищник!
-                    ctx.setLineDash([10, 5]); // Пунктир для агрессии
-                    ctx.beginPath(); ctx.arc(anim.x, anim.y, anim.size * 1.5, 0, Math.PI * 2); ctx.stroke();
-                    ctx.setLineDash([]);
+                    ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 5; ctx.setLineDash([10, 5]);
+                    ctx.beginPath(); ctx.arc(anim.x, anim.y, anim.size * 1.5, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
                 }
             });
 
-            // 5. ОТРИСОВКА ЧАСТИЦ
             particles.forEach(p => p.draw(ctx));
 
-            // 6. ОТРИСОВКА ИГРОКА
-            ctx.save();
-            ctx.translate(player.x, player.y);
-            ctx.scale(player.direction, 1); 
-            ctx.rotate(player.vy * 0.03); 
-            
+            ctx.save(); ctx.translate(player.x, player.y); ctx.scale(player.direction, 1); ctx.rotate(player.vy * 0.03); 
             ctx.font = `${player.stage.size * 2}px Arial`;
-            
-            // Если игрок хищник (Дракон, Сокол и т.д.), делаем его больше и страшнее
-            if(player.stage.size >= 60) {
-                ctx.shadowColor = player.stage.type === 'god' ? '#ffffff' : '#ef4444';
-                ctx.shadowBlur = 30;
-            }
-            
-            ctx.fillText(player.stage.emoji, 0, 0);
-            ctx.restore(); 
+            if(player.stage.size >= 60) { ctx.shadowColor = player.stage.type === 'god' ? '#ffffff' : '#ef4444'; ctx.shadowBlur = 30; }
+            ctx.fillText(player.stage.emoji, 0, 0); ctx.restore(); 
 
-            // Имя игрока
             ctx.fillStyle = 'white'; ctx.font = '900 18px Nunito'; ctx.lineWidth = 4; ctx.strokeStyle = 'black';
             ctx.strokeText(player.stage.name, player.x, player.y - player.stage.size - 15);
             ctx.fillText(player.stage.name, player.x, player.y - player.stage.size - 15);
 
-            ctx.restore(); // Конец трансформации камеры
+            ctx.restore(); 
 
-            // 7. Эффект Ночи (Затенение экрана)
             if (darkness > 0 && camera.y > SPACE_Y) {
-                ctx.fillStyle = `rgba(0, 0, 10, ${darkness * 0.5})`; // Полупрозрачный черный
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = `rgba(0, 0, 10, ${darkness * 0.5})`; ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
             if (gameActive) requestAnimationFrame(gameLoop);
         }
 
-        function gameLoop() { 
-            update(); 
-            draw(); 
-        }
+        function gameLoop() { update(); draw(); }
 
-        // --- ЗАПУСК ---
         document.getElementById('btn-play').onclick = () => {
             document.getElementById('menu').classList.add('hidden'); 
             document.getElementById('hud').classList.remove('hidden');
-            
-            player.stage = EVOLUTION[0]; 
-            player.xp = 0; player.score = 0; player.oxygen = 100;
-            player.x = 1000; player.y = GROUND_Y - 50; player.vx = 0; player.vy = 0;
-            
-            initWorld(); 
-            updateUI(); 
-            gameActive = true; 
-            gameLoop();
+            player.stage = EVOLUTION[0]; player.xp = 0; player.score = 0; player.oxygen = 100;
+            player.x = 1000; player.y = LAND_Y - 50; player.vx = 0; player.vy = 0;
+            initWorld(); updateUI(); gameActive = true; gameLoop();
         };
 
-        draw(); // Рисуем фон для меню
+        draw(); 
     </script>
 </body>
 </html>
