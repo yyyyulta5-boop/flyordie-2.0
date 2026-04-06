@@ -3,74 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EvoWorld - Biomes Edition</title>
+    <title>EvoWorld - PRO EDITION 3.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap');
         
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Nunito', sans-serif; user-select: none; touch-action: none; }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #000; 
+            font-family: 'Nunito', sans-serif; 
+            user-select: none; 
+            touch-action: none; 
+        }
         canvas { display: block; }
 
-        #menu { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); }
+        /* Стили Меню */
+        #menu { 
+            background: rgba(15, 23, 42, 0.85); 
+            backdrop-filter: blur(12px); 
+        }
 
         .btn-play {
-            background: linear-gradient(to bottom, #3b82f6, #2563eb);
-            box-shadow: 0 6px 0 #1e3a8a, 0 15px 20px rgba(0,0,0,0.5);
+            background: linear-gradient(to bottom, #ef4444, #b91c1c);
+            box-shadow: 0 6px 0 #7f1d1d, 0 15px 20px rgba(0,0,0,0.5);
             transition: all 0.1s;
         }
-        .btn-play:active { transform: translateY(6px); box-shadow: 0 0px 0 #1e3a8a; }
-
-        .bar-container {
-            width: 250px; height: 20px; background: rgba(0,0,0,0.6);
-            border: 2px solid #555; border-radius: 10px;
-            overflow: hidden; position: relative; margin-top: 4px;
+        .btn-play:active { 
+            transform: translateY(6px); 
+            box-shadow: 0 0px 0 #7f1d1d; 
         }
-        .xp-fill { height: 100%; background: linear-gradient(90deg, #facc15, #f59e0b); transition: width 0.2s; }
-        .o2-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #0284c7); transition: width 0.1s; }
-        
+
+        /* Полосы интерфейса */
+        .bar-container {
+            width: 280px; 
+            height: 24px; 
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #334155; 
+            border-radius: 12px;
+            overflow: hidden; 
+            position: relative; 
+            margin-top: 6px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .xp-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #facc15, #f59e0b); 
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .o2-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #38bdf8, #0284c7); 
+            transition: width 0.1s; 
+        }
         .bar-text {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 12px; font-weight: 900; text-shadow: 1px 1px 2px black;
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            color: white; 
+            font-size: 13px; 
+            font-weight: 900; 
+            text-shadow: 1px 1px 2px black;
+            letter-spacing: 1px;
+        }
+
+        /* Иллюзия онлайна (Killfeed) */
+        #killfeed {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: flex-end;
+            pointer-events: none;
+        }
+        .kill-msg {
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            animation: fadeOut 4s forwards;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateX(20px); }
+            10% { opacity: 1; transform: translateX(0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
         }
     </style>
 </head>
 <body>
 
+    <!-- ИНТЕРФЕЙС HUD -->
     <div id="hud" class="fixed top-0 left-0 w-full p-4 flex justify-between items-start z-10 hidden pointer-events-none">
         <div class="flex items-start gap-4">
-            <div id="player-emoji" class="text-6xl drop-shadow-lg bg-white/10 p-2 rounded-2xl border-2 border-white/20">🦟</div>
+            <div id="player-emoji" class="text-6xl drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] bg-slate-800/50 p-3 rounded-2xl border-2 border-slate-500/50 transition-transform duration-300">🦟</div>
             <div>
-                <h2 id="player-name-display" class="text-white text-2xl font-black drop-shadow-md">Комар</h2>
+                <h2 id="player-name-display" class="text-white text-3xl font-black drop-shadow-lg tracking-wide">Комар</h2>
+                
                 <div class="bar-container">
                     <div id="xp-fill" class="xp-fill" style="width: 0%;"></div>
                     <div id="xp-text" class="bar-text">0 / 30 XP</div>
                 </div>
-                <div class="bar-container border-blue-400">
+
+                <div class="bar-container border-blue-500">
                     <div id="o2-fill" class="o2-fill" style="width: 100%;"></div>
-                    <div id="o2-text" class="bar-text text-blue-100">OXYGEN</div>
+                    <div id="o2-text" class="bar-text text-blue-50">OXYGEN / AIR</div>
                 </div>
-                <p id="eats-info" class="text-green-400 text-sm font-bold mt-2 drop-shadow-md">Ест: 💩</p>
+
+                <div class="mt-2 bg-black/60 inline-block px-3 py-1 rounded-lg border border-white/10">
+                    <p id="eats-info" class="text-green-400 text-sm font-black drop-shadow-md tracking-wider">ЕСТ: 💩</p>
+                </div>
             </div>
         </div>
-        <div class="text-right bg-black/50 p-3 rounded-xl border border-white/10">
-            <p class="text-gray-400 text-xs font-bold uppercase">Счет</p>
-            <p class="text-white text-3xl font-black"><span id="score">0</span></p>
+
+        <div class="text-right bg-slate-900/80 p-4 rounded-2xl border-2 border-slate-700 shadow-xl">
+            <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Total Score</p>
+            <p class="text-white text-4xl font-black"><span id="score">0</span></p>
         </div>
     </div>
 
+    <div id="killfeed"></div>
+
+    <!-- ГЛАВНОЕ МЕНЮ -->
     <div id="menu" class="fixed inset-0 flex items-center justify-center z-50">
-        <div class="bg-gray-900 p-8 rounded-3xl shadow-2xl text-center max-w-md w-full border-4 border-gray-700">
-            <h1 class="text-5xl font-black text-blue-400 mb-2 italic tracking-tighter">EVO<span class="text-green-400">BIOMES</span></h1>
-            <p id="death-reason" class="text-red-400 font-bold mb-6 uppercase hidden">Вы погибли!</p>
+        <div class="bg-slate-900 p-10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.8)] text-center max-w-lg w-full border-4 border-slate-700 relative overflow-hidden">
             
-            <button id="btn-play" class="btn-play w-full text-white font-black text-2xl py-4 rounded-xl uppercase tracking-widest mt-4">Играть</button>
+            <div class="absolute -top-20 -left-20 w-40 h-40 bg-blue-500 rounded-full blur-[100px] opacity-30"></div>
+            <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-red-500 rounded-full blur-[100px] opacity-30"></div>
+
+            <h1 class="text-6xl font-black text-white mb-2 italic tracking-tighter relative z-10">
+                EVO<span class="text-red-500">PRO</span>
+            </h1>
+            <p id="death-reason" class="text-red-400 font-black mb-6 uppercase tracking-widest hidden bg-red-500/20 py-2 rounded-lg border border-red-500/30 relative z-10">Вы погибли!</p>
             
-            <div class="mt-8 text-left bg-gray-800 p-4 rounded-xl border border-gray-600 text-gray-300">
-                <h3 class="font-bold text-white mb-2">Обновление:</h3>
-                <ul class="text-sm space-y-2 font-bold">
-                    <li>🌍 3 Биома: Лес, Пустыня, Зима!</li>
-                    <li>🐪 Новые животные (Верблюды, Пингвины)</li>
-                    <li>💩 Баг с туалетом исправлен! Животные гадят!</li>
+            <button id="btn-play" class="btn-play w-full text-white font-black text-3xl py-5 rounded-2xl uppercase tracking-widest mt-4 relative z-10">ИГРАТЬ</button>
+            
+            <div class="mt-8 text-left bg-slate-800 p-6 rounded-2xl border border-slate-600 text-slate-300 relative z-10 shadow-inner">
+                <h3 class="font-black text-white mb-3 text-lg border-b border-slate-600 pb-2">PRO-ФИЧИ (v3.1):</h3>
+                <ul class="text-sm space-y-3 font-bold">
+                    <li class="flex items-center gap-2">🌊 <span class="text-blue-300">Океан добавлен! У воды другая физика.</span></li>
+                    <li class="flex items-center gap-2">🚨 <span class="text-red-300">Хищники теперь умные и гоняются за тобой.</span></li>
+                    <li class="flex items-center gap-2">✨ <span class="text-yellow-300">Новые частицы, эффекты и смена дня/ночи.</span></li>
                 </ul>
             </div>
         </div>
@@ -79,117 +158,242 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
+        /** 
+         * EVO WORLD - PRO EDITION
+         * Движок написан с нуля для максимальной производительности и читаемости.
+         */
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        const WORLD_WIDTH = 6000; // Увеличил мир под биомы
+        // --- КОНСТАНТЫ МИРА ---
+        const WORLD_WIDTH = 8000;  // Огромный мир (4 биома по 2000px)
         const WORLD_HEIGHT = 4000;
         const GROUND_Y = 3800; 
         const SPACE_Y = 1500;
 
-        // ЭВОЛЮЦИЯ
+        // Координаты Биомов
+        const BIOME_FOREST = { min: 0, max: 2000, color: '#166534' };
+        const BIOME_DESERT = { min: 2000, max: 4000, color: '#ca8a04' };
+        const BIOME_SNOW   = { min: 4000, max: 6000, color: '#e0f2fe' };
+        const BIOME_OCEAN  = { min: 6000, max: 8000, color: '#0369a1' }; // Вода
+
+        // --- БАЗА ДАННЫХ ИГРЫ ---
+
         const EVOLUTION = [
-            { id: 0, name: "Комар", emoji: "🦟", size: 20, speed: 6, flap: -8, reqXp: 30, eats: ['poop'] },
-            { id: 1, name: "Бабочка", emoji: "🦋", size: 30, speed: 7, flap: -9, reqXp: 80, eats: ['flower', 'cactus', 'ice'] },
-            { id: 2, name: "Птичка", emoji: "🐦", size: 40, speed: 9, flap: -10, reqXp: 200, eats: ['bug'] },
-            { id: 3, name: "Сокол", emoji: "🦅", size: 60, speed: 12, flap: -12, reqXp: 500, eats: ['mouse', 'penguin'] },
-            { id: 4, name: "Дракон", emoji: "🐉", size: 90, speed: 15, flap: -14, reqXp: 1200, eats: ['pig', 'camel', 'cloud'] },
-            { id: 5, name: "Пришелец", emoji: "👽", size: 100, speed: 18, flap: -16, reqXp: 3000, eats: ['star'] },
-            { id: 6, name: "НЛО", emoji: "🛸", size: 130, speed: 22, flap: -18, reqXp: 8000, eats: ['meteor'] },
-            { id: 7, name: "Божество", emoji: "🌌", size: 180, speed: 25, flap: -20, reqXp: 99999, eats: ['planet'] }
+            { id: 0, type: 'fly',      name: "Комар",    emoji: "🦟", size: 20, speed: 6, flap: -8, reqXp: 30, eats: ['poop'], isAquatic: false },
+            { id: 1, type: 'butterfly',name: "Бабочка",  emoji: "🦋", size: 30, speed: 7, flap: -9, reqXp: 80, eats: ['flower', 'cactus', 'ice'], isAquatic: false },
+            { id: 2, type: 'bird',     name: "Птичка",   emoji: "🐦", size: 40, speed: 9, flap: -10, reqXp: 200, eats: ['bug', 'crab'], isAquatic: false },
+            { id: 3, type: 'turtle',   name: "Черепаха", emoji: "🐢", size: 50, speed: 5, flap: -6, reqXp: 400, eats: ['kelp', 'fish'], isAquatic: true }, // Земноводное
+            { id: 4, type: 'eagle',    name: "Сокол",    emoji: "🦅", size: 65, speed: 13, flap: -12, reqXp: 800, eats: ['mouse', 'penguin', 'turtle'], isAquatic: false },
+            { id: 5, type: 'shark',    name: "Акула",    emoji: "🦈", size: 85, speed: 14, flap: -10, reqXp: 1500, eats: ['turtle', 'penguin', 'pig'], isAquatic: true },
+            { id: 6, type: 'dragon',   name: "Дракон",   emoji: "🐉", size: 100, speed: 16, flap: -14, reqXp: 3000, eats: ['camel', 'shark', 'cloud'], isAquatic: false },
+            { id: 7, type: 'alien',    name: "Пришелец", emoji: "👽", size: 110, speed: 19, flap: -16, reqXp: 6000, eats: ['star'], isAquatic: false },
+            { id: 8, type: 'ufo',      name: "НЛО",      emoji: "🛸", size: 140, speed: 23, flap: -18, reqXp: 12000, eats: ['meteor'], isAquatic: false },
+            { id: 9, type: 'god',      name: "Божество", emoji: "🌌", size: 200, speed: 26, flap: -20, reqXp: 99999, eats: ['planet'], isAquatic: false }
         ];
 
-        // БИОМЫ И ЕДА
         const FOOD_TYPES = {
-            'poop':   { emoji: '💩', size: 15, xp: 5 },
-            'flower': { emoji: '🌺', size: 20, xp: 10, zone: 'grass' },
-            'cactus': { emoji: '🌵', size: 20, xp: 10, zone: 'desert' },
-            'ice':    { emoji: '🧊', size: 20, xp: 10, zone: 'snow' },
-            'cloud':  { emoji: '☁️', size: 60, xp: 100, floatSpeed: 1 }, 
-            'star':   { emoji: '⭐', size: 30, xp: 200, floatSpeed: 0.5 }, 
-            'meteor': { emoji: '☄️', size: 50, xp: 500, floatSpeed: 3 },
-            'planet': { emoji: '🪐', size: 100,xp: 1500, floatSpeed: 0.2 }
+            'poop':   { emoji: '💩', size: 15, xp: 5,   zones: ['forest', 'desert', 'snow'] },
+            'flower': { emoji: '🌺', size: 20, xp: 10,  zones: ['forest'] },
+            'cactus': { emoji: '🌵', size: 25, xp: 15,  zones: ['desert'] },
+            'ice':    { emoji: '🧊', size: 20, xp: 10,  zones: ['snow'] },
+            'kelp':   { emoji: '🌿', size: 25, xp: 15,  zones: ['ocean'] },
+            'cloud':  { emoji: '☁️', size: 70, xp: 100, floatSpeed: 1, isSky: true }, 
+            'star':   { emoji: '⭐', size: 35, xp: 200, floatSpeed: 0.5, isSpace: true }, 
+            'meteor': { emoji: '☄️', size: 55, xp: 500, floatSpeed: 3, isSpace: true },
+            'planet': { emoji: '🪐', size: 110,xp: 1500, floatSpeed: 0.2, isSpace: true }
         };
 
         const ANIMAL_TYPES = {
-            'bug':    { emoji: '🪲', size: 15, xp: 15, speed: 3, jump: -6, isFlying: true, minY: GROUND_Y-500, zone: 'all' },
-            'mouse':  { emoji: '🐁', size: 25, xp: 25, speed: 4, jump: -5, isFlying: false, minY: GROUND_Y, zone: 'grass' },
-            'pig':    { emoji: '🐖', size: 40, xp: 50, speed: 2, jump: -4, isFlying: false, minY: GROUND_Y, zone: 'grass' },
-            'camel':  { emoji: '🐪', size: 45, xp: 50, speed: 2, jump: -3, isFlying: false, minY: GROUND_Y, zone: 'desert' },
-            'penguin':{ emoji: '🐧', size: 30, xp: 30, speed: 3, jump: -5, isFlying: false, minY: GROUND_Y, zone: 'snow' }
+            'bug':    { emoji: '🪲', size: 15, xp: 15, speed: 3, jump: -6, isFlying: true,  minY: GROUND_Y-500, zones: ['forest', 'desert'] },
+            'mouse':  { emoji: '🐁', size: 25, xp: 25, speed: 4, jump: -5, isFlying: false, minY: GROUND_Y,     zones: ['forest'] },
+            'pig':    { emoji: '🐖', size: 40, xp: 50, speed: 2, jump: -4, isFlying: false, minY: GROUND_Y,     zones: ['forest'] },
+            'camel':  { emoji: '🐪', size: 50, xp: 60, speed: 2, jump: -3, isFlying: false, minY: GROUND_Y,     zones: ['desert'] },
+            'penguin':{ emoji: '🐧', size: 35, xp: 40, speed: 3, jump: -5, isFlying: false, minY: GROUND_Y,     zones: ['snow'] },
+            'crab':   { emoji: '🦀', size: 20, xp: 20, speed: 2, jump: -3, isFlying: false, minY: GROUND_Y,     zones: ['ocean'] },
+            'fish':   { emoji: '🐟', size: 30, xp: 35, speed: 5, jump: -2, isFlying: true,  minY: GROUND_Y-300, zones: ['ocean'] }, // Плавает
+            'shark':  { emoji: '🦈', size: 70, xp: 150, speed: 8, jump: -3, isFlying: true,  minY: GROUND_Y-500, zones: ['ocean'], eats: ['turtle', 'fish', 'penguin', 'pig'] }, // Хищник-бот
+            'eagle':  { emoji: '🦅', size: 60, xp: 120, speed: 9, jump: -8, isFlying: true,  minY: GROUND_Y-800, zones: ['forest', 'snow', 'desert'], eats: ['mouse', 'penguin', 'turtle'] } // Хищник-бот
         };
 
+        // --- СОСТОЯНИЕ ИГРЫ ---
         let gameActive = false;
-        let mouseX = 0; let mouseY = 0;
+        let mouseX = 0, mouseY = 0;
         let camera = { x: 0, y: 0 };
+        let timeOfDay = 0; // 0 - 24000 (Для смены дня и ночи)
         
         let player = {
-            x: WORLD_WIDTH / 2, y: GROUND_Y - 100,
-            vx: 0, vy: 0, stage: EVOLUTION[0],
-            xp: 0, score: 0, direction: 1, oxygen: 100
+            x: 1000, y: GROUND_Y - 100,
+            vx: 0, vy: 0, 
+            stage: EVOLUTION[0],
+            xp: 0, score: 0, 
+            direction: 1, 
+            oxygen: 100,
+            inWater: false
         };
 
         let foods = []; 
         let animals = [];
+        let particles = [];
 
-        function getZoneX(zone) {
-            const w3 = WORLD_WIDTH / 3;
-            if (zone === 'grass') return Math.random() * w3;
-            if (zone === 'desert') return w3 + Math.random() * w3;
-            if (zone === 'snow') return w3*2 + Math.random() * w3;
+        // --- СИСТЕМА ЧАСТИЦ (VFX) ---
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 10;
+                this.vy = (Math.random() - 0.5) * 10;
+                this.size = Math.random() * 6 + 2;
+                this.color = color;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.02 + 0.02;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.2; // Гравитация частиц
+                this.life -= this.decay;
+            }
+            draw(ctx) {
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        function createExplosion(x, y, color, count = 15) {
+            for(let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        // --- ГЕНЕРАЦИЯ МИРА ---
+        
+        function getZoneX(zones) {
+            if (!zones || zones.length === 0) return Math.random() * WORLD_WIDTH;
+            const zone = zones[Math.floor(Math.random() * zones.length)];
+            if (zone === 'forest') return Math.random() * 2000;
+            if (zone === 'desert') return 2000 + Math.random() * 2000;
+            if (zone === 'snow')   return 4000 + Math.random() * 2000;
+            if (zone === 'ocean')  return 6000 + Math.random() * 2000;
             return Math.random() * WORLD_WIDTH;
         }
 
-        // isVIP = true игнорирует лимит еды (Специально для 💩)
         function spawnFood(type, forcedX = null, forcedY = null, isVIP = false) {
-            if (!isVIP && foods.length > 250) return;
+            if (!isVIP && foods.length > 300) return;
             let data = FOOD_TYPES[type];
             
-            let xPos = forcedX || getZoneX(data.zone || 'all');
+            let xPos = forcedX || getZoneX(data.zones);
             let yPos = forcedY;
+            
             if (!yPos) {
-                if (type === 'poop' || type === 'flower' || type === 'cactus' || type === 'ice') yPos = GROUND_Y - Math.random() * 50;
-                else if (type === 'cloud') yPos = SPACE_Y + Math.random() * (GROUND_Y - 800 - SPACE_Y);
-                else yPos = Math.random() * SPACE_Y; 
+                if (data.isSky) yPos = SPACE_Y + Math.random() * 1500;
+                else if (data.isSpace) yPos = Math.random() * SPACE_Y;
+                else yPos = GROUND_Y - Math.random() * 50;
             }
 
             foods.push({ x: xPos, y: yPos, type: type, ...data });
         }
 
-        function spawnAnimal() {
-            if (animals.length > 60) return;
+        function spawnAnimal(specificType = null) {
+            if (animals.length > 80) return;
             const types = Object.keys(ANIMAL_TYPES);
-            const type = types[Math.floor(Math.random() * types.length)];
+            const type = specificType || types[Math.floor(Math.random() * types.length)];
             const data = ANIMAL_TYPES[type];
             
+            let xPos = getZoneX(data.zones);
+            let yPos = data.isFlying ? data.minY + Math.random() * 300 : GROUND_Y - Math.random() * 50;
+
             animals.push({
-                x: getZoneX(data.zone),
-                y: GROUND_Y - 100,
+                id: Math.random(), // Уникальный ID
+                x: xPos,
+                y: yPos,
                 vx: (Math.random() - 0.5) * data.speed,
-                vy: 0, type: type, ...data,
-                direction: Math.random() > 0.5 ? 1 : -1
+                vy: 0, 
+                type: type, 
+                ...data,
+                direction: Math.random() > 0.5 ? 1 : -1,
+                actionTimer: 0
             });
         }
 
         function initWorld() {
-            foods = []; animals = [];
-            for(let i=0; i<40; i++) { spawnFood('flower'); spawnFood('cactus'); spawnFood('ice'); }
-            for(let i=0; i<30; i++) spawnFood('cloud');
-            for(let i=0; i<40; i++) { spawnFood('star'); spawnFood('meteor'); spawnFood('planet'); }
-            for(let i=0; i<60; i++) spawnAnimal();
+            foods = []; animals = []; particles = [];
+            timeOfDay = 8000; // Начинаем с утра
+            
+            for(let i=0; i<50; i++) { spawnFood('flower'); spawnFood('cactus'); spawnFood('ice'); spawnFood('kelp'); }
+            for(let i=0; i<40; i++) spawnFood('cloud');
+            for(let i=0; i<50; i++) { spawnFood('star'); spawnFood('meteor'); spawnFood('planet'); }
+            for(let i=0; i<80; i++) spawnAnimal();
         }
 
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+        // --- УПРАВЛЕНИЕ И ИВЕНТЫ ---
+        
+        window.addEventListener('resize', () => { 
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+        });
         window.dispatchEvent(new Event('resize'));
+        
         canvas.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
         canvas.addEventListener('touchmove', (e) => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; });
         
         function flap() {
             if (!gameActive) return;
-            player.vy = player.stage.flap; 
+            // Если в воде, прыжок слабее, но можно плыть в любую сторону
+            if (player.inWater) {
+                let targetWorldY = mouseY + camera.y;
+                let dy = targetWorldY - player.y;
+                player.vy = dy < 0 ? player.stage.flap * 0.7 : Math.abs(player.stage.flap * 0.5);
+            } else {
+                player.vy = player.stage.flap; 
+            }
+            createExplosion(player.x, player.y + player.stage.size, '#ffffff', 3); // Пыль от взмаха
         }
         canvas.addEventListener('mousedown', flap);
         canvas.addEventListener('touchstart', flap);
+
+        // Иллюзия онлайна
+        function addKillFeed(killer, victim) {
+            const feed = document.getElementById('killfeed');
+            const msg = document.createElement('div');
+            msg.className = 'kill-msg';
+            msg.innerHTML = `<span style="color:#ef4444">${killer}</span> съел <span>${victim}</span>`;
+            feed.appendChild(msg);
+            setTimeout(() => msg.remove(), 4000);
+        }
+
+        // Симуляция чужих убийств
+        setInterval(() => {
+            if(!gameActive) return;
+            if(Math.random() < 0.3) {
+                const predators = ['🦅 Сокол', '🦈 Акула', '🐉 Дракон'];
+                const preys = ['🐁 Мышь', '🐧 Пингвин', '🐖 Свинью'];
+                addKillFeed(predators[Math.floor(Math.random()*predators.length)], preys[Math.floor(Math.random()*preys.length)]);
+            }
+        }, 8000);
+
+        // --- ОСНОВНАЯ ЛОГИКА ---
+
+        function checkEvolution() {
+            if (player.xp >= player.stage.reqXp) {
+                const nextStage = EVOLUTION[player.stage.id + 1];
+                if (nextStage) {
+                    player.xp -= player.stage.reqXp; 
+                    player.stage = nextStage;
+                    
+                    // Мега-взрыв при эволюции
+                    createExplosion(player.x, player.y, '#facc15', 50);
+                    
+                    const emoji = document.getElementById('player-emoji');
+                    emoji.classList.add('scale-150', 'rotate-12');
+                    setTimeout(() => emoji.classList.remove('scale-150', 'rotate-12'), 400);
+                }
+            }
+            updateUI();
+        }
 
         function updateUI() {
             document.getElementById('player-emoji').textContent = player.stage.emoji;
@@ -198,183 +402,360 @@
             
             const req = player.stage.reqXp;
             document.getElementById('xp-fill').style.width = req === 99999 ? '100%' : `${(player.xp / req) * 100}%`;
-            document.getElementById('xp-text').textContent = req === 99999 ? "MAX" : `${player.xp} / ${req} XP`;
+            document.getElementById('xp-text').textContent = req === 99999 ? "MAX LEVEL" : `${player.xp} / ${req} XP`;
 
-            const eatEmojis = player.stage.eats.map(f => FOOD_TYPES[f] ? FOOD_TYPES[f].emoji : (ANIMAL_TYPES[f] ? ANIMAL_TYPES[f].emoji : '🥩'));
-            document.getElementById('eats-info').textContent = "Ест: " + eatEmojis.join(' ');
-        }
-
-        function checkEvolution() {
-            if (player.xp >= player.stage.reqXp) {
-                const nextStage = EVOLUTION[player.stage.id + 1];
-                if (nextStage) {
-                    player.xp -= player.stage.reqXp; player.stage = nextStage;
-                    document.getElementById('player-emoji').classList.add('scale-150');
-                    setTimeout(() => document.getElementById('player-emoji').classList.remove('scale-150'), 300);
-                }
-            }
-            updateUI();
+            // Обновляем список еды
+            const eatIcons = player.stage.eats.map(f => {
+                if (FOOD_TYPES[f]) return FOOD_TYPES[f].emoji;
+                if (ANIMAL_TYPES[f]) return ANIMAL_TYPES[f].emoji;
+                const evo = EVOLUTION.find(e => e.type === f);
+                return evo ? evo.emoji : '🥩';
+            });
+            document.getElementById('eats-info').textContent = "ЕСТ: " + eatIcons.join(' ');
         }
 
         function die(reason) {
             gameActive = false;
-            document.getElementById('hud').classList.add('hidden');
-            document.getElementById('menu').classList.remove('hidden');
-            document.getElementById('death-reason').textContent = reason;
-            document.getElementById('death-reason').classList.remove('hidden');
+            createExplosion(player.x, player.y, '#ef4444', 100); // Взрыв крови
+            
+            setTimeout(() => {
+                document.getElementById('hud').classList.add('hidden');
+                document.getElementById('menu').classList.remove('hidden');
+                document.getElementById('death-reason').textContent = reason;
+                document.getElementById('death-reason').classList.remove('hidden');
+            }, 1000); // Даем время посмотреть на смерть
         }
 
         function update() {
             if (!gameActive) return;
 
+            // Время суток
+            timeOfDay += 2;
+            if(timeOfDay > 24000) timeOfDay = 0;
+
+            // Проверка Биома (Океан)
+            player.inWater = player.x >= BIOME_OCEAN.min && player.y > GROUND_Y - 800; // Вода глубокая
+
+            // --- ДВИЖЕНИЕ ИГРОКА ---
             let targetWorldX = mouseX + camera.x;
             let dx = targetWorldX - player.x;
             
             if (Math.abs(dx) > 10) {
                 player.direction = dx > 0 ? 1 : -1;
                 let targetVx = player.direction * player.stage.speed;
-                player.vx += (targetVx - player.vx) * 0.1; 
-            } else { player.vx *= 0.9; }
+                // В воде двигаемся медленнее
+                player.vx += ((player.inWater ? targetVx * 0.6 : targetVx) - player.vx) * 0.1; 
+            } else { 
+                player.vx *= 0.9; 
+            }
 
-            player.vy += 0.4; 
-            player.vy *= 0.96; 
-            player.x += player.vx; player.y += player.vy;
+            // Гравитация
+            if (player.inWater) {
+                player.vy += 0.1; // Архимедова сила (почти не тонем)
+                player.vy *= 0.9; // Сильное сопротивление воды
+            } else {
+                player.vy += 0.4; // Обычная гравитация
+                player.vy *= 0.96; // Воздух
+            }
+            
+            player.x += player.vx; 
+            player.y += player.vy;
 
+            // Ограничения карты
             if (player.x < 0) { player.x = 0; player.vx = 0; }
             if (player.x > WORLD_WIDTH) { player.x = WORLD_WIDTH; player.vx = 0; }
             if (player.y < 0) { player.y = 0; player.vy = 0; } 
-            if (player.y > GROUND_Y) { player.y = GROUND_Y; player.vy = 0; }
+            if (player.y > GROUND_Y && !player.inWater) { player.y = GROUND_Y; player.vy = 0; }
+            if (player.y > GROUND_Y && player.inWater) { player.y = GROUND_Y; player.vy = 0; } // Дно океана
 
-            if (player.y < SPACE_Y) {
-                if (player.stage.id < 5) {
-                    player.oxygen -= 0.3; 
-                    if (player.oxygen <= 0) die("Задохнулся в космосе! 🥶");
-                } else { player.oxygen = 100; }
-            } else { player.oxygen = Math.min(100, player.oxygen + 1); }
-            document.getElementById('o2-fill').style.width = `${player.oxygen}%`;
-            document.getElementById('o2-fill').style.background = player.oxygen < 30 ? 'red' : '';
+            // --- СИСТЕМА КИСЛОРОДА ---
+            let isSuffocating = false;
+            let deathMsg = "";
 
+            if (player.y < SPACE_Y && player.stage.id < 7) {
+                // Космос, а мы не пришелец
+                isSuffocating = true;
+                deathMsg = "Задохнулся в вакууме! 🥶";
+            } 
+            else if (player.inWater && !player.stage.isAquatic) {
+                // Под водой, а мы не рыба/черепаха
+                isSuffocating = true;
+                deathMsg = "Утонул в океане! 🫧";
+            }
+            else if (!player.inWater && player.stage.isAquatic && player.stage.type !== 'turtle') {
+                // Мы акула/рыба и вылезли на сушу (Черепахе можно)
+                isSuffocating = true;
+                deathMsg = "Высох на суше! ☀️";
+            }
+
+            if (isSuffocating) {
+                player.oxygen -= 0.3; 
+                if (player.oxygen <= 0) die(deathMsg);
+            } else { 
+                player.oxygen = Math.min(100, player.oxygen + 1); 
+            }
+
+            // Отрисовка полосы O2
+            const o2Fill = document.getElementById('o2-fill');
+            o2Fill.style.width = `${player.oxygen}%`;
+            o2Fill.style.background = player.oxygen < 30 ? '#ef4444' : '';
+
+            // --- КАМЕРА ---
             camera.x += (player.x - canvas.width / 2 - camera.x) * 0.1;
             camera.y += (player.y - canvas.height / 2 - camera.y) * 0.1;
             camera.x = Math.max(0, Math.min(camera.x, WORLD_WIDTH - canvas.width));
             camera.y = Math.max(0, Math.min(camera.y, WORLD_HEIGHT - canvas.height));
 
+            // --- ИСКУССТВЕННЫЙ ИНТЕЛЛЕКТ ЖИВОТНЫХ (PRO AI) ---
             for (let i = animals.length - 1; i >= 0; i--) {
                 let anim = animals[i];
-                anim.vy += 0.4; anim.x += anim.vx; anim.y += anim.vy;
+                let isAnimInWater = anim.x >= BIOME_OCEAN.min;
 
-                if (anim.y > anim.minY) {
-                    anim.y = anim.minY; anim.vy = 0;
+                // Базовая физика животных
+                if (!anim.isFlying && !isAnimInWater) anim.vy += 0.4; // Гравитация
+                if (isAnimInWater) anim.vy *= 0.9; // Вода тормозит
+                
+                anim.x += anim.vx; 
+                anim.y += anim.vy;
+
+                // Коллизия с землей
+                if (anim.y > anim.minY && !isAnimInWater) {
+                    anim.y = anim.minY; 
+                    anim.vy = 0;
                     if (Math.random() < 0.02) anim.vy = anim.jump; 
                 }
 
-                if (Math.random() < 0.01) {
+                anim.actionTimer--;
+
+                // ИИ ХИЩНИКА: Поиск Игрока
+                let isHunting = false;
+                const distToPlayer = Math.hypot(player.x - anim.x, player.y - anim.y);
+                
+                if (anim.eats && anim.eats.includes(player.stage.type) && distToPlayer < 600) {
+                    // Бот видит игрока и хочет его съесть!
+                    isHunting = true;
+                    anim.direction = player.x > anim.x ? 1 : -1;
+                    anim.vx = anim.direction * anim.speed * 1.2; // Ускорение при охоте
+                    
+                    if (anim.isFlying || isAnimInWater) {
+                        anim.vy = (player.y - anim.y) * 0.05; // Летит/плывет вверх-вниз к игроку
+                    }
+                    
+                    // Бот убивает игрока
+                    if (distToPlayer < player.stage.size + anim.size * 0.5) {
+                        addKillFeed(anim.emoji + " " + anim.name, player.stage.name);
+                        die(`Вас сожрал ${anim.name}! 💀`);
+                        return; // Конец игры
+                    }
+                }
+
+                // ИИ ОБЫЧНОГО ПОВЕДЕНИЯ (Блуждание)
+                if (!isHunting && anim.actionTimer <= 0) {
+                    anim.actionTimer = 60 + Math.random() * 100;
                     anim.direction = Math.random() > 0.5 ? 1 : -1;
                     anim.vx = anim.direction * anim.speed;
+                    if (anim.isFlying || isAnimInWater) {
+                        anim.vy = (Math.random() - 0.5) * anim.speed; // Меняет высоту
+                    }
                 }
                 
-                // Ограничение биомов для животных
-                const w3 = WORLD_WIDTH / 3;
+                // Ограничение зоны обитания
                 let minX = 0, maxX = WORLD_WIDTH;
-                if(anim.zone === 'grass') { maxX = w3; }
-                if(anim.zone === 'desert') { minX = w3; maxX = w3*2; }
-                if(anim.zone === 'snow') { minX = w3*2; }
+                if(anim.zones) {
+                    if (!anim.zones.includes('desert') && anim.x > BIOME_DESERT.min && anim.x < BIOME_DESERT.max) anim.vx *= -1;
+                    if (!anim.zones.includes('ocean') && anim.x > BIOME_OCEAN.min) { anim.vx *= -1; anim.x = BIOME_OCEAN.min - 10; }
+                }
+                if (anim.x < 0 || anim.x > WORLD_WIDTH) anim.vx *= -1;
+                if ((anim.isFlying || isAnimInWater) && anim.y < anim.minY) anim.vy *= -1; // Не улетает в космос
 
-                if (anim.x < minX || anim.x > maxX) anim.vx *= -1;
-
-                // 💩 VIP СПАВН 💩 (Теперь работает 100%!)
-                if ((anim.type === 'pig' || anim.type === 'mouse' || anim.type === 'camel' || anim.type === 'penguin') && Math.random() < 0.005) {
-                    spawnFood('poop', anim.x, anim.y, true); // true = Игнорировать лимит
+                // 💩 VIP СПАВН (Генерация еды)
+                if ((anim.type === 'pig' || anim.type === 'mouse' || anim.type === 'camel') && Math.random() < 0.003) {
+                    spawnFood('poop', anim.x, anim.y, true);
                 }
 
-                const dist = Math.hypot(player.x - anim.x, player.y - anim.y);
-                if (dist < player.stage.size + anim.size && player.stage.eats.includes(anim.type)) {
-                    player.xp += anim.xp; player.score += anim.xp;
-                    animals.splice(i, 1); checkEvolution();
+                // Игрок ест Животное
+                if (distToPlayer < player.stage.size + anim.size && player.stage.eats.includes(anim.type)) {
+                    player.xp += anim.xp; 
+                    player.score += anim.xp;
+                    createExplosion(anim.x, anim.y, '#ef4444', 20); // Кровь
+                    animals.splice(i, 1); 
+                    checkEvolution();
                 }
             }
 
+            // --- ЛОГИКА ЕДЫ ---
             for (let i = foods.length - 1; i >= 0; i--) {
                 const food = foods[i];
                 if (food.floatSpeed) food.x -= food.floatSpeed; 
-                if (food.x < -100) food.x = WORLD_WIDTH + 100; 
+                if (food.x < -200) food.x = WORLD_WIDTH + 200; 
 
                 const dist = Math.hypot(player.x - food.x, player.y - food.y);
                 if (dist < player.stage.size + food.size && player.stage.eats.includes(food.type)) {
-                    player.xp += food.xp; player.score += food.xp;
-                    foods.splice(i, 1); checkEvolution();
+                    player.xp += food.xp; 
+                    player.score += food.xp;
+                    createExplosion(food.x, food.y, '#22c55e', 10); // Зеленые искры
+                    foods.splice(i, 1); 
+                    checkEvolution();
                 }
             }
 
-            if (animals.length < 60 && Math.random() < 0.02) spawnAnimal();
+            // Восполнение мира
+            if (animals.length < 80 && Math.random() < 0.03) spawnAnimal();
+            
+            // Обновление частиц
+            particles.forEach((p, i) => {
+                p.update();
+                if(p.life <= 0) particles.splice(i, 1);
+            });
         }
 
-        function draw() {
-            let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            if (camera.y < SPACE_Y) { bgGrad.addColorStop(0, '#000000'); bgGrad.addColorStop(1, '#0f172a'); } 
-            else { bgGrad.addColorStop(0, '#1e3a8a'); bgGrad.addColorStop(1, '#87CEEB'); }
-            ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // --- ОТРИСОВКА (РЕНДЕР) ---
 
-            if (camera.y < SPACE_Y + 500) {
-                ctx.fillStyle = 'white';
-                for(let i=0; i<80; i++) { ctx.fillRect((i * 87) % canvas.width, (i * 43) % canvas.height, 2, 2); }
+        function draw() {
+            // 1. Отрисовка Неба и Космоса с учетом Времени Суток
+            let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            
+            // Вычисляем темноту (0 - день, 1 - ночь)
+            let darkness = 0;
+            if (timeOfDay > 12000 && timeOfDay < 20000) darkness = (timeOfDay - 12000) / 4000; // Закат
+            if (timeOfDay >= 20000 || timeOfDay < 4000) darkness = 1; // Ночь
+            if (timeOfDay >= 4000 && timeOfDay <= 8000) darkness = 1 - ((timeOfDay - 4000) / 4000); // Рассвет
+            if (darkness > 1) darkness = 1;
+
+            if (camera.y < SPACE_Y) { 
+                // Космос всегда черный
+                skyGradient.addColorStop(0, '#000000'); 
+                skyGradient.addColorStop(1, '#0f172a'); 
+            } else { 
+                // Небо меняет цвет
+                let r1 = Math.floor(30 * (1-darkness)); let g1 = Math.floor(58 * (1-darkness)); let b1 = Math.floor(138 * (1-darkness));
+                let r2 = Math.floor(135 * (1-darkness)); let g2 = Math.floor(206 * (1-darkness)); let b2 = Math.floor(235 * (1-darkness));
+                skyGradient.addColorStop(0, `rgb(${r1},${g1},${b1})`); 
+                skyGradient.addColorStop(1, `rgb(${r2},${g2},${b2})`); 
+            }
+            
+            ctx.fillStyle = skyGradient; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Звезды (в космосе или ночью)
+            if (camera.y < SPACE_Y + 500 || darkness > 0.5) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${camera.y < SPACE_Y ? 1 : darkness})`;
+                for(let i=0; i<100; i++) { 
+                    ctx.fillRect((i * 137) % canvas.width, (i * 93) % canvas.height, 2, 2); 
+                }
             }
 
-            ctx.save(); ctx.translate(-camera.x, -camera.y);
+            ctx.save(); 
+            ctx.translate(-camera.x, -camera.y);
 
-            // ОТРИСОВКА БИОМОВ (Земля)
-            const w3 = WORLD_WIDTH / 3;
-            ctx.fillStyle = '#166534'; ctx.fillRect(0, GROUND_Y, w3, WORLD_HEIGHT - GROUND_Y); // Лес
-            ctx.fillStyle = '#ca8a04'; ctx.fillRect(w3, GROUND_Y, w3, WORLD_HEIGHT - GROUND_Y); // Пустыня
-            ctx.fillStyle = '#e0f2fe'; ctx.fillRect(w3*2, GROUND_Y, w3, WORLD_HEIGHT - GROUND_Y); // Снег
+            // 2. ОТРИСОВКА БИОМОВ (Земля и Вода)
+            ctx.fillStyle = BIOME_FOREST.color; ctx.fillRect(BIOME_FOREST.min, GROUND_Y, 2000, WORLD_HEIGHT - GROUND_Y);
+            ctx.fillStyle = BIOME_DESERT.color; ctx.fillRect(BIOME_DESERT.min, GROUND_Y, 2000, WORLD_HEIGHT - GROUND_Y);
+            ctx.fillStyle = BIOME_SNOW.color;   ctx.fillRect(BIOME_SNOW.min, GROUND_Y, 2000, WORLD_HEIGHT - GROUND_Y);
+            
+            // ОКЕАН (Прозрачная вода)
+            ctx.fillStyle = 'rgba(3, 105, 161, 0.7)'; 
+            ctx.fillRect(BIOME_OCEAN.min, GROUND_Y - 800, 2000, WORLD_HEIGHT - (GROUND_Y - 800));
+            // Дно океана
+            ctx.fillStyle = '#b45309'; // Песок на дне
+            ctx.fillRect(BIOME_OCEAN.min, GROUND_Y, 2000, WORLD_HEIGHT - GROUND_Y);
 
+            // 3. ОТРИСОВКА ЕДЫ
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             foods.forEach(food => {
-                ctx.font = `${food.size * 2}px Arial`; ctx.fillText(food.emoji, food.x, food.y);
+                ctx.font = `${food.size * 2}px Arial`; 
+                ctx.fillText(food.emoji, food.x, food.y);
+                
                 if (player.stage.eats.includes(food.type)) {
-                    ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3;
-                    ctx.beginPath(); ctx.arc(food.x, food.y, food.size * 1.5, 0, Math.PI * 2); ctx.stroke();
+                    ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.arc(food.x, food.y, food.size * 1.4, 0, Math.PI * 2); ctx.stroke();
                 }
             });
 
+            // 4. ОТРИСОВКА ЖИВОТНЫХ (Ботов)
             animals.forEach(anim => {
-                ctx.save(); ctx.translate(anim.x, anim.y);
+                ctx.save(); 
+                ctx.translate(anim.x, anim.y);
                 ctx.scale(anim.direction, 1); 
-                ctx.font = `${anim.size * 2}px Arial`; ctx.fillText(anim.emoji, 0, 0);
+                
+                // Раскачивание при ходьбе
+                if(!anim.isFlying && anim.vy === 0 && anim.vx !== 0) {
+                    ctx.rotate(Math.sin(Date.now() / 100) * 0.1);
+                }
+
+                ctx.font = `${anim.size * 2}px Arial`; 
+                ctx.fillText(anim.emoji, 0, 0);
                 ctx.restore();
 
+                // Подсветка (Зеленая = еда, КРАСНАЯ = ХИЩНИК!)
                 if (player.stage.eats.includes(anim.type)) {
-                    ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 4;
+                    ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 4;
                     ctx.beginPath(); ctx.arc(anim.x, anim.y, anim.size * 1.3, 0, Math.PI * 2); ctx.stroke();
+                } else if (anim.eats && anim.eats.includes(player.stage.type)) {
+                    ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 5; // Хищник!
+                    ctx.setLineDash([10, 5]); // Пунктир для агрессии
+                    ctx.beginPath(); ctx.arc(anim.x, anim.y, anim.size * 1.5, 0, Math.PI * 2); ctx.stroke();
+                    ctx.setLineDash([]);
                 }
             });
 
+            // 5. ОТРИСОВКА ЧАСТИЦ
+            particles.forEach(p => p.draw(ctx));
+
+            // 6. ОТРИСОВКА ИГРОКА
             ctx.save();
             ctx.translate(player.x, player.y);
             ctx.scale(player.direction, 1); 
             ctx.rotate(player.vy * 0.03); 
+            
             ctx.font = `${player.stage.size * 2}px Arial`;
+            
+            // Если игрок хищник (Дракон, Сокол и т.д.), делаем его больше и страшнее
+            if(player.stage.size >= 60) {
+                ctx.shadowColor = player.stage.type === 'god' ? '#ffffff' : '#ef4444';
+                ctx.shadowBlur = 30;
+            }
+            
             ctx.fillText(player.stage.emoji, 0, 0);
             ctx.restore(); 
 
-            ctx.fillStyle = 'white'; ctx.font = 'bold 16px Nunito'; ctx.lineWidth = 3; ctx.strokeStyle = 'black';
-            ctx.strokeText(player.stage.name, player.x, player.y - player.stage.size - 10);
-            ctx.fillText(player.stage.name, player.x, player.y - player.stage.size - 10);
+            // Имя игрока
+            ctx.fillStyle = 'white'; ctx.font = '900 18px Nunito'; ctx.lineWidth = 4; ctx.strokeStyle = 'black';
+            ctx.strokeText(player.stage.name, player.x, player.y - player.stage.size - 15);
+            ctx.fillText(player.stage.name, player.x, player.y - player.stage.size - 15);
 
-            ctx.restore();
+            ctx.restore(); // Конец трансформации камеры
+
+            // 7. Эффект Ночи (Затенение экрана)
+            if (darkness > 0 && camera.y > SPACE_Y) {
+                ctx.fillStyle = `rgba(0, 0, 10, ${darkness * 0.5})`; // Полупрозрачный черный
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
             if (gameActive) requestAnimationFrame(gameLoop);
         }
 
-        function gameLoop() { update(); draw(); }
+        function gameLoop() { 
+            update(); 
+            draw(); 
+        }
 
+        // --- ЗАПУСК ---
         document.getElementById('btn-play').onclick = () => {
-            document.getElementById('menu').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden');
-            player.stage = EVOLUTION[0]; player.xp = 0; player.score = 0; player.oxygen = 100;
-            player.x = WORLD_WIDTH / 2; player.y = GROUND_Y - 50; player.vx = 0; player.vy = 0;
-            initWorld(); updateUI(); gameActive = true; gameLoop();
+            document.getElementById('menu').classList.add('hidden'); 
+            document.getElementById('hud').classList.remove('hidden');
+            
+            player.stage = EVOLUTION[0]; 
+            player.xp = 0; player.score = 0; player.oxygen = 100;
+            player.x = 1000; player.y = GROUND_Y - 50; player.vx = 0; player.vy = 0;
+            
+            initWorld(); 
+            updateUI(); 
+            gameActive = true; 
+            gameLoop();
         };
 
-        draw(); 
+        draw(); // Рисуем фон для меню
     </script>
 </body>
 </html>
